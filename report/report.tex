@@ -1,0 +1,135 @@
+\documentclass[conference,11pt]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{adjustbox}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage{qtree}
+\usepackage{cancel}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{mathtools}
+\usepackage{semantic}
+\usepackage{stmaryrd}
+\usepackage{twoopt}
+\usepackage{pgfplots}
+\usepackage{bm}
+
+\usetikzlibrary{automata, positioning, arrows, calc, shapes.multipart}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\newcommand{\code}[1]{\mbox{\texttt{#1}}}
+\newcommand{\unitvec}[1]{\boldsymbol{\widehat{#1}}}
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\brac}[1]{\left[ #1 \right]}
+\newcommand{\cbrac}[1]{\left\{ #1 \right\}}
+\newcommand{\dbrac}[1]{\left\llbracket #1 \right\rrbracket}
+\newcommand{\deriv}[2]{\frac{d #1}{d #2}}
+\newcommand{\nderiv}[3]{\frac{d^{#3} #1}{d #2^{#3}}}
+\newcommand{\pderiv}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\npderiv}[3]{\frac{\partial^{#3} #1}{\partial #2^{#3}}}
+\newcommand{\vo}{\vec{o}\@ifnextchar{^}{\,}{}}
+\newcommand{\underbrack}[2]{\underbrace{#1}_{\substack{#2}}}
+\newcommand{\REALS}{\mathbb{R}}
+\newcommand{\NATURALS}{\mathbb{N}}
+\newcommand{\INTEGERS}{\mathbb{Z}}
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+\newcommand{\cov}{\code{COV}}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\newcommand\exinf{\mathrel{\overset{\infty}{\exists}}}
+\newcommand\fainf{\mathrel{\overset{\infty}{\forall}}}
+\newcommand{\setcomp}[2]{\cbrac{#1\, \middle|\, #2}}
+\newcommand{\powerset}[1]{2^{#1}}
+\newcommand{\finitewords}{A_1A_2\ldots A_N \in \paren{\powerset{AP}}^+}
+\newcommand{\infinitewords}{A_1A_2\ldots \in \paren{\powerset{AP}}^{\omega}}
+\newcommand{\ltlalways}{\square}
+\newcommand{\ltlnext}{\bigcirc}
+\newcommand{\ltleventually}{\Diamond}
+\newcommand{\ltland}{\wedge}
+\newcommand{\ltlor}{\vee}
+\newcommand{\ltluntil}{\mathbin{\bold{U}}}
+\newcommand{\impl}{\rightarrow}
+\newcommand{\nor}{\bar{\vee}}
+\newcommand{\true}{\textbf{true}}
+\newcommand{\false}{\textbf{false}}
+\newcommand{\vocab}{\mathcal{V}}
+\newcommand{\model}{\mathcal{M}}
+\newcommand{\domain}{\mathcal{D}}
+\newcommand{\interp}{\mathcal{I}}
+\newcommand{\hoare}[3]{\cbrac{#1}\texttt{#2}\cbrac{#3}}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\freevars}{freevars}
+\DeclareMathOperator{\prim}{prime}
+\DeclareMathOperator{\odd}{odd}
+\DeclareMathOperator{\post}{post}
+\newcommandtwoopt{\evalu}[3][\mathcal{M}][\rho]{\llbracket #3\rrbracket_{#1,#2}}
+\tikzset{
+  node distance=2cm, % specifies the minimum distance between two nodes. Change if necessary.
+  initial text=$ $, % sets the text that appears on the start arrow
+  accepting/.style={rectangle},
+  state/.append style={circle},
+  every edge/.style={draw,
+    ->,>=stealth', % Makes edges directed with bold arrowheads
+    auto,
+    semithick},
+  cfgedge/.style={rectangle, rounded corners, fill=gray!50, anchor=center}
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Time and Energy Optimal Control for a Single Track Modeled Vehicle.}
+
+\author{\IEEEauthorblockN{Adil}
+\IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
+Freiburg, Germany \\
+email
+\and
+\IEEEauthorblockN{Anton Pozharskiy}
+\IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
+Freiburg, Germany \\
+anton@pozhar.ski
+\and
+\IEEEauthorblockN{Mario}
+\IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
+Freiburg, Germany \\
+email}
+}
+\maketitle
+
+\begin{abstract}
+  
+\end{abstract}
+
+\begin{IEEEkeywords}
+Optimal control
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+\section{Definitions}
+
+\section{Numerical Solution}
+
+\section{Results}
+
+\section{Conclusions}
+
+\section{Further Exploration}
+
+\section*{Acknowledgment}
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref.bib}
+%\vspace{12pt}
+
+\end{document}
