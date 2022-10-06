@@ -4,7 +4,11 @@ import casadi.*
 
 model_name = 'mpc_car';
 model = build_vehicle_model;
-model = build_curvilinear_model(model)
+model = build_curvilinear_model(model);
+
+%% Sizes
+nx = length(model.sym_x);
+nu = length(model.sym_u);
 
 %% discretization
 N = 20;
@@ -45,12 +49,16 @@ end
 
 % constraints
 ocp_model.set('constr_type', 'auto');
-ocp_model.set('constr_expr_h', model.expr_h);
-U_max = 80;
-ocp_model.set('constr_lh', -U_max); % lower bound on h
-ocp_model.set('constr_uh', U_max);  % upper bound on h
+ocp_model.set('constr_lbu', model.constr_lbu);
+ocp_model.set('constr_ubu', model.constr_ubu);
+ocp_model.set('constr_lbx', model.constr_lbx);
+ocp_model.set('constr_ubx', model.constr_ubx);
 
-ocp_model.set('constr_x0', x0);
+ocp_model.set('constr_lbx_0', model.constr_lbx_0);
+ocp_model.set('constr_ubx_0', model.constr_ubx_0);
+
+ocp_model.set('constr_lbx_e', model.constr_lbx_e);
+ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 % ... see ocp_model.model_struct to see what other fields can be set
 
 %% acados ocp set opts
@@ -80,7 +88,7 @@ ocp.set('init_pi', zeros(nx, N))
 
 % change values for specific shooting node using:
 %   ocp.set('field', value, optional: stage_index)
-ocp.set('constr_lbx', x0, 0)
+%ocp.set('constr_lbx', x0, 0)
 
 % solve
 ocp.solve();
