@@ -31,7 +31,7 @@ ocp_model.set('sym_u', model.sym_u);
 ocp_model.set('sym_xdot', model.sym_xdot);
 
 % cost
-ocp_model.set('cost_expr_ext_cost', model.expr_ext_cost);
+%ocp_model.set('cost_expr_ext_cost', model.expr_ext_cost); Not needed
 ocp_model.set('cost_expr_ext_cost_e', model.expr_ext_cost_e);
 
 % dynamics
