@@ -25,6 +25,17 @@ alpha_prime = omega - kappa(s)*s_prime;
 % Explicit forward dynamics (with T_final as constant state).
 sym_xdot = T_final*[s_prime;n_prime;alpha_prime;f_veh;0];
 
+%% Build costs
+% Terminal cost, TODO: Also energy, probably need to calculate that in the
+%                      vehicle model (Architecture question).
+
+cost_expr_ext_cost_e = T_final;
+
+%% Build initial conditiona
+constr_lbx_0 = [0];
+constr_ubx_0 = [0];
+
+
 %% Generic part
 % (make of local workspace a struct and pass to output
 names = who;
