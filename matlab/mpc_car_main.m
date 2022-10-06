@@ -13,7 +13,6 @@ nu = length(model.sym_u);
 %% discretization
 N = 20;
 T = 1; % time horizon length
-x0 = [0; pi; 0; 0];
 
 nlp_solver = 'sqp'; % sqp, sqp_rti
 qp_solver = 'partial_condensing_hpipm';
