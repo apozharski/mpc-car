@@ -60,20 +60,21 @@ ocp_model.set('cost_expr_ext_cost_e', model.cost_expr_ext_cost_e);
 % 
 
 ocp_model.set('constr_type', 'bgh');
-ocp_model.set('constr_Jbu', eye(nu));
-ocp_model.set('constr_lbu', [0,-1,.005]);
-ocp_model.set('constr_ubu', [2,1,2]);
-ocp_model.set('constr_Jbx', [0,1,0;0,0,1]);
-ocp_model.set('constr_lbx', [-1;-pi/2]);
-ocp_model.set('constr_ubx', [1;pi/2]);
+ocp_model.set('constr_Jbu', model.constr_Jbu);
+ocp_model.set('constr_lbu', model.constr_lbu);
+ocp_model.set('constr_ubu', model.constr_ubu);
+ocp_model.set('constr_Jbx', model.constr_Jbx);
+ocp_model.set('constr_lbx', model.constr_lbx);
+ocp_model.set('constr_ubx', model.constr_ubx);
 
-%ocp_model.set('constr_Jbx_0', eye(nx));
-ocp_model.set('constr_x0', [0;0;0]);
-%ocp_model.set('constr_ubx_0', [0;0;0]);
+ocp_model.set('constr_Jbx_0', model.constr_Jbx_0);
+ocp_model.set('constr_lbx_0', model.constr_lbx_0);
+ocp_model.set('constr_ubx_0', model.constr_ubx_0);
+%ocp_model.set('constr_x0', [0;0;0;0.1]);
 
-ocp_model.set('constr_Jbx_e', [1,0,0;0,1,0]);
-ocp_model.set('constr_lbx_e', [10,-1]);
-ocp_model.set('constr_ubx_e', [10,1]);
+ocp_model.set('constr_Jbx_e', model.constr_Jbx_e);
+ocp_model.set('constr_lbx_e', model.constr_lbx_e);
+ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 % ... see ocp_model.model_struct to see what other fields can be set
 
 
@@ -99,8 +100,8 @@ ocp = acados_ocp(ocp_model, ocp_opts);
 
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
+x_traj_init(4,:) = 1;
 u_traj_init = zeros(nu, N);
-u_traj_init(3,:) = 1;
 
 %% call ocp solver
 
@@ -123,7 +124,8 @@ status = ocp.get('status'); % 0 - success
 ocp.print('stat')
 %% Plot
 close all;
-ts = [0,cumsum(utraj(3,:))];
+ts = [0,cumsum(xtraj(4,:))];
+ts = ts(1:end-1);
 figure;
 plot(ts,xtraj(1,:));
 ylabel('s');

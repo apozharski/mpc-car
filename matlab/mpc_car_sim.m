@@ -18,8 +18,8 @@ model_name =  'sim_car';
 % simulation parameters
 N_sim = 100;
 h = 1; % simulation time
-x0 = [0; 0; 0]; % initial state
-u0 = [1,0,.1]; % control input
+x0 = [0; 0; 0;xtraj(4,1)]; % initial state
+u0 = [1,0]; % control input
 
 %% acados sim model
 sim_model = acados_sim_model();
@@ -70,3 +70,20 @@ for ii=1:N_sim
 	% get simulated state
 	x_sim(:,ii+1) = sim.get('xn');
 end
+%% plot
+close all;
+ts = [0,cumsum(xtraj(4,:))];
+ts = ts(1:end-1);
+figure;
+plot(ts,x_sim(1,:));
+ylabel('s');
+figure;
+plot(ts,x_sim(2,:));
+ylabel('n');
+figure;
+plot(ts,x_sim(3,:));
+ylabel('alpha');
+figure;
+stairs(ts(1:end-1),utraj(1,:));
+figure;
+stairs(ts(1:end-1),utraj(2,:));
