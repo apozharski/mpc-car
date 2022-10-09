@@ -11,7 +11,7 @@ end
 s = MX.sym('s');                        % abscissa (distance along road).
 n = MX.sym('n');                        % normal distance to road.
 alpha = MX.sym('alpha');                % angle of vehicle to road.
-kappa = interpolant('kappa','bspline',{[0,2,4,6,8,10]},[0,.1,.6,.4,0,-.2]);    % deriv of orientation w.r.t s.
+kappa = interpolant('kappa','bspline',{[0,2,4,6,8,10,15,20,22,25]},[0,.1,.6,.4,0,.2,-.4,.6,.4,.2]);    % deriv of orientation w.r.t s.
 %kappa = Function('kappa',{s}, {.5*cos(pi*s)})
 %kappa = Function('kappa',{s}, {0.1});
 W_l = Function('W_l', {s}, {MX(-1)});       % Width Left of the road center.
@@ -51,7 +51,7 @@ constr_ubx = [1;pi/2;ubx_veh];
 % TODO use ACADOS h inequalities to model variable width.
 
 %% Build terminal constraints
-s_max = 10; % How long is the road
+s_max = 25; % How long is the road
 
 % Constrain us to be at the end of the track, with a reasonable angle to 
 % the road and within the bounds. 

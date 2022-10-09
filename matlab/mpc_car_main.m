@@ -81,7 +81,7 @@ ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
 ocp_opts.set('globalization','merit_backtracking');
-ocp_opts.set('nlp_solver_max_iter', 5000);
+ocp_opts.set('nlp_solver_max_iter', 500);
 %ocp_opts.set('regularize_method','mirror');
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
