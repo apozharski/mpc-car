@@ -139,3 +139,7 @@ figure;
 stairs(ts(1:end-1),utraj(1,:));
 figure;
 stairs(ts(1:end-1),utraj(2,:));
+
+%%
+[r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
+plot_solution(r_x,r_y,r_theta,r_s,xtraj(1,:),xtraj(2,:));

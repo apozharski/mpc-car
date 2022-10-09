@@ -11,9 +11,9 @@ end
 s = MX.sym('s');                        % abscissa (distance along road).
 n = MX.sym('n');                        % normal distance to road.
 alpha = MX.sym('alpha');                % angle of vehicle to road.
-%kappa = interpolant('kappa','bspline',{[0,2,4,6,8,10]},[0,.1,.6,.4,0,-.2]);    % deriv of orientation w.r.t s.
+kappa = interpolant('kappa','bspline',{[0,2,4,6,8,10]},[0,.1,.6,.4,0,-.2]);    % deriv of orientation w.r.t s.
 %kappa = Function('kappa',{s}, {.5*cos(pi*s)})
-kappa = Function('kappa',{s}, {0.1});
+%kappa = Function('kappa',{s}, {0.1});
 W_l = Function('W_l', {s}, {MX(-1)});       % Width Left of the road center.
 W_r = Function('W_r', {s}, {MX(1)});        % Width right of the road center.
 
@@ -44,7 +44,7 @@ constr_Jbu = Jbu_veh;
 constr_lbu = lbu_veh;
 constr_ubu = ubu_veh;
 
-constr_Jbx = blkdiag([0,1,0,0;0,0,1,0],Jbx_veh)
+constr_Jbx = blkdiag([0,1,0,0;0,0,1,0],Jbx_veh);
 constr_lbx = [-1;-pi/2;lbx_veh];
 constr_ubx = [1;pi/2;ubx_veh];
 
