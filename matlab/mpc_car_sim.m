@@ -18,8 +18,9 @@ model_name =  'sim_car';
 % simulation parameters
 N_sim = 100;
 h = 1; % simulation time
-x0 = [0; 0; 0;xtraj(4,1)]; % initial state
-u0 = [1,0]; % control input
+%x0 = [0; 0; 0; 0.1;0]; % initial state
+x0 = [0; 0; 0;xtraj(4,1);0]; % initial state
+u0 = [1,0.01]; % control input
 
 %% acados sim model
 sim_model = acados_sim_model();
@@ -55,7 +56,7 @@ for ii=1:N_sim
 	% set initial state
 	sim.set('x', x_sim(:,ii));
 	sim.set('u', utraj(:,ii));
-    %sim.set('u', u0);
+    %sim.set('u', [1,0.03]);
     % initialize implicit integrator
     if (strcmp(method, 'irk'))
         sim.set('xdot', zeros(nx,1));
@@ -87,3 +88,6 @@ figure;
 stairs(ts(1:end-1),utraj(1,:));
 figure;
 stairs(ts(1:end-1),utraj(2,:));
+%%
+[r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
+plot_solution(r_x,r_y,r_theta,r_s,x_sim(1,:),x_sim(2,:));
