@@ -86,7 +86,7 @@ ocp_opts.set('nlp_solver_max_iter', 5000);
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
 %ocp_opts.set('warm_start_first_qp', 'true');
-ocp_opts.set('levenberg_marquardt',10);
+ocp_opts.set('levenberg_marquardt', 0.8);
 ocp_opts.set('param_scheme_N', N);
 ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -142,4 +142,4 @@ stairs(ts(1:end-1),utraj(2,:));
 
 %%
 [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
-plot_solution(r_x,r_y,r_theta,r_s,xtraj(1,:),xtraj(2,:));
+plot_solution(r_x,r_y,r_theta,r_s,xtraj);
