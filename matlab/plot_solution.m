@@ -1,7 +1,34 @@
-function plot_solution(r_x,r_y,r_theta,r_s,v_traj)
+function plot_solution(r_x,r_y,r_theta,r_s,v_traj,v_u)
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
+close all;
+%% Plot vehicle Curvilinear state
+ts = [0,cumsum(v_traj(4,:))];
+ts = ts(1:end-1);
+figure;
+subplot(2,2,1);
+plot(ts,v_traj(1,:));
+ylabel('$s$','Interpreter','latex');
+subplot(2,2,2);
+plot(ts,v_traj(2,:));
+ylabel('$n$','Interpreter','latex');
+subplot(2,2,3);
+plot(ts,v_traj(3,:));
+ylabel('$\alpha$','Interpreter','latex');
 
+%% Plot vehicle CG state
+%% Plot Controls
+figure;
+subplot(2,2,1);
+stairs(ts(1:end-1),v_u(1,:));
+ylabel('$j_{\textrm{brake}}$','Interpreter','latex')
+subplot(2,2,2);
+stairs(ts(1:end-1),v_u(2,:));
+ylabel('$j_{\textrm{engine}}$','Interpreter','latex')
+subplot(2,2,3);
+stairs(ts(1:end-1),v_u(3,:));
+ylabel('$\omega_{\textrm{steer}}$','Interpreter','latex')
+%% Plot road trajectory
 % Break out vehicle 
 v_s = v_traj(1,:);
 v_n = v_traj(2,:);
