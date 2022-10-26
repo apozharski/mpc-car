@@ -18,9 +18,9 @@ model_name =  'sim_car';
 % simulation parameters
 N_sim = 100;
 h = 1; % simulation time
-%x0 = [0; 0; 0; 0.1;0]; % initial state
-x0 = [0; 0; 0;xtraj(4,1);0]; % initial state
-u0 = [1,0.01]; % control input
+x0 = [0; 0; 0; 0.1; 0; 0; 0; 0; 0; 0]; % initial state
+%x0 = [0; 0; 0;xtraj(4,1);0]; % initial state
+u0 = [1,0.01;]; % control input
 
 %% acados sim model
 sim_model = acados_sim_model();
@@ -50,12 +50,18 @@ sim = acados_sim(sim_model, sim_opts);
 %% simulate system in loop
 x_sim = zeros(nx, N_sim+1);
 x_sim(:,1) = x0;
-
+u_sim = zeros(nu, N_sim);
+t = 0;
+dt = x_sim(4,1);
+j_engine = interpolant('j_engine','linear',{[0,1,2,3,4,5,6,7]},[0,0.5,0,-0.5,0,0,0,0]);
+j_brake = interpolant('j_engine','linear',{[0,1,2,3,4,5,6,7]},[0,0,0,0.5,0,-.5,0,0]);
+omega_steer = interpolant('j_engine','linear',{[0,1,2,3,4,5,6,7]},[0,0.1,0.1,0,-0.1,-0.1,0,0]);
 for ii=1:N_sim
-	
 	% set initial state
 	sim.set('x', x_sim(:,ii));
-	sim.set('u', utraj(:,ii));
+    u = [j_brake(t),j_engine(t),omega_steer(t)];
+    u_sim(:,ii) = u.full();
+	sim.set('u', u.full());
     %sim.set('u', [1,0.03]);
     % initialize implicit integrator
     if (strcmp(method, 'irk'))
@@ -70,24 +76,27 @@ for ii=1:N_sim
 
 	% get simulated state
 	x_sim(:,ii+1) = sim.get('xn');
+    t = t+dt;
 end
 %% plot
-close all;
-ts = [0,cumsum(xtraj(4,:))];
-ts = ts(1:end-1);
-figure;
-plot(ts,x_sim(1,:));
-ylabel('s');
-figure;
-plot(ts,x_sim(2,:));
-ylabel('n');
-figure;
-plot(ts,x_sim(3,:));
-ylabel('alpha');
-figure;
-stairs(ts(1:end-1),utraj(1,:));
-figure;
-stairs(ts(1:end-1),utraj(2,:));
+% close all;
+% ts = [0,cumsum(xtraj(4,:))];
+% ts = ts(1:end-1);
+% figure;
+% plot(ts,x_sim(1,:));
+% ylabel('s');
+% figure;
+% plot(ts,x_sim(2,:));
+% ylabel('n');
+% figure;
+% plot(ts,x_sim(3,:));
+% ylabel('alpha');
+% figure;
+% stairs(ts(1:end-1),u_sim(1,:));
+% figure;
+% stairs(ts(1:end-1),u_sim(2,:));
+% figure;
+% stairs(ts(1:end-1),u_sim(3,:));
 %%
 [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
-plot_solution(r_x,r_y,r_theta,r_s,x_sim(1,:),x_sim(2,:));
+plot_solution(r_x,r_y,r_theta,r_s,x_sim,u_sim);

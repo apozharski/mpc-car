@@ -25,14 +25,14 @@ k_brake = 1;
 brake_bias = 0.5;
 mass = 1;
 weight_bias = 0.5;
-k_r = 100;                 % Rear cornering stiffness
-k_f = 100;                 % Front cornering stiffness
+k_r = 1;                 % Rear cornering stiffness
+k_f = 1;                 % Front cornering stiffness
 
 %% vehicle model ODEs
 % Characteristic angles
-beta = atan2(L_r * tan(delta), L);
-slip_f = delta - (v-L_f*omega)/u;
-slip_r = -(v-L_r*omega)/u;
+%beta = atan2(L_r * tan(delta), L);
+slip_f = delta - atan2((v-L_f*omega),u);
+slip_r = -atan2((v-L_r*omega),u);
 
 % Forces
 F_p_r = k_engine*t_engine-k_brake*brake_bias*t_brake;
@@ -43,9 +43,9 @@ F_t_f = k_f*slip_f*(mass*(1-weight_bias));
 t_brake_dot = j_brake;
 t_engine_dot = j_engine;
 delta_dot = omega_steer; % steering rate
-u_dot = F_p_r + cos(delta)*F_p_f + sin(delta)*F_p_f;
-v_dot = F_t_r + sin(delta)*F_p_f + cos(delta)*F_p_f;
-omega_dot = (k_engine*t_engine-k_brake*t_brake)*tan(delta)*cos(beta)/L;
+u_dot = F_p_r + sin(delta)*F_t_f + cos(delta)*F_p_f;
+v_dot = F_t_r + cos(delta)*F_t_f + sin(delta)*F_p_f;
+omega_dot = F_t_r*L_r + (cos(delta)*F_t_f + sin(delta)*F_p_f)*L_f;
 
 
 u_veh = [j_brake;j_engine;omega_steer];
