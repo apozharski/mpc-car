@@ -22,17 +22,29 @@ L_f = 0.5;
 L = L_r+L_f;
 k_engine = 1;
 k_brake = 1;
+brake_bias = 0.5;
+mass = 1;
+weight_bias = 0.5;
+k_r = 100;                 % Rear cornering stiffness
+k_f = 100;                 % Front cornering stiffness
 
 %% vehicle model ODEs
+% Characteristic angles
 beta = atan2(L_r * tan(delta), L);
 slip_f = delta - (v-L_f*omega)/u;
 slip_r = -(v-L_r*omega)/u;
 
+% Forces
+F_p_r = k_engine*t_engine-k_brake*brake_bias*t_brake;
+F_t_r = k_r*slip_r*(mass*weight_bias);
+F_p_f = -k_brake*(1-brake_bias)*t_brake;
+F_t_f = k_f*slip_f*(mass*(1-weight_bias));
+
 t_brake_dot = j_brake;
 t_engine_dot = j_engine;
 delta_dot = omega_steer; % steering rate
-u_dot = (k_engine*t_engine-k_brake*t_brake)*cos(beta);
-v_dot = (k_engine*t_engine-k_brake*t_brake)*sin(beta);
+u_dot = F_p_r + cos(delta)*F_p_f + sin(delta)*F_p_f;
+v_dot = F_t_r + sin(delta)*F_p_f + cos(delta)*F_p_f;
 omega_dot = (k_engine*t_engine-k_brake*t_brake)*tan(delta)*cos(beta)/L;
 
 
@@ -61,7 +73,7 @@ x0_veh = zeros(6,1);
 % (make local workspace a struct and pass to output
 names = who;
 for ii = 1:length(names)
-    eval([ 'model.' names{ii} '=' names{ii} ';'])
+    eval([ 'model.' names{ii} '=' names{ii} ';']);
 end
 end
 
