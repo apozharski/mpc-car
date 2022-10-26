@@ -6,6 +6,8 @@ import casadi.*
 if nargin == 1
     unfold_struct(varargin{1},'caller')
 end
+%% Constants
+s_max = 25; % How long is the road
 
 %% Variable declaration
 s = MX.sym('s');                        % abscissa (distance along road).
@@ -50,20 +52,19 @@ constr_ubu = ubu_veh;
 % constr_Jbx = [constr_Jbx,zeros(size(constr_Jbx,1),nx-size(constr_Jbx,2))];
 % constr_lbx = [-1;-pi/2;lbx_veh];
 % constr_ubx = [1;pi/2;ubx_veh];
-constr_Jbx = blkdiag([0,1,0,0],Jbx_veh);
+constr_Jbx = blkdiag([1,0,0,0;0,1,0,0],Jbx_veh);
 zeros(size(constr_Jbx,1),nx-size(constr_Jbx,2))
 constr_Jbx = [constr_Jbx,zeros(size(constr_Jbx,1),nx-size(constr_Jbx,2))];
-constr_lbx = [-1;lbx_veh];
-constr_ubx = [1;ubx_veh];
+constr_lbx = [0;-1;lbx_veh];
+constr_ubx = [s_max;1;ubx_veh];
 % TODO use ACADOS h inequalities to model variable width.
 
 %% Build terminal constraints
-s_max = 25; % How long is the road
 
 % Constrain us to be at the end of the track, with a reasonable angle to 
 % the road and within the bounds. 
-constr_Jbx_e = blkdiag([1,0,0,0;0,1,0,0],Jbx_e_veh)
-zeros(size(constr_Jbx_e,1),nx-size(constr_Jbx_e,2))
+constr_Jbx_e = blkdiag([1,0,0,0;0,1,0,0],Jbx_e_veh);
+zeros(size(constr_Jbx_e,1),nx-size(constr_Jbx_e,2));
 constr_Jbx_e = [constr_Jbx_e,zeros(size(constr_Jbx_e,1),nx-size(constr_Jbx_e,2))];
 constr_lbx_e = [s_max;-1;lbx_e_veh];
 constr_ubx_e = [s_max;1;ubx_e_veh];
