@@ -86,7 +86,7 @@ ocp_opts.set('nlp_solver_max_iter', 5000);
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
 %ocp_opts.set('warm_start_first_qp', 'true');
-ocp_opts.set('levenberg_marquardt', 0.8);
+ocp_opts.set('levenberg_marquardt', 10);
 ocp_opts.set('param_scheme_N', N);
 ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -100,6 +100,7 @@ ocp = acados_ocp(ocp_model, ocp_opts);
 
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
+x_traj_init(5,:) = 1;
 x_traj_init(4,:) = 2;
 u_traj_init = zeros(nu, N);
 
