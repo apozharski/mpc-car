@@ -7,15 +7,15 @@ if nargin == 1
     unfold_struct(varargin{1},'caller')
 end
 %% Constants
-s_max = 25; % How long is the road
+s_max = 5; % How long is the road
 
 %% Variable declaration
 s = MX.sym('s');                        % abscissa (distance along road).
 n = MX.sym('n');                        % normal distance to road.
 alpha = MX.sym('alpha');                % angle of vehicle to road.
-kappa = interpolant('kappa','bspline',{[0,2,4,6,8,10,15,20,22,25]},[0,.1,.6,.4,0,.2,-.4,.6,.4,.2]);    % deriv of orientation w.r.t s.
+%kappa = interpolant('kappa','bspline',{[0,2,4,6,8,10,15,20,22,25]},[0,.1,.6,.4,0,.2,-.4,.6,.4,.2]);    % deriv of orientation w.r.t s.
 %kappa = Function('kappa',{s}, {.5*cos(pi*s)})
-%kappa = Function('kappa',{s}, {0.1});
+kappa = Function('kappa',{s}, {0});
 W_l = Function('W_l', {s}, {MX(-1)});       % Width Left of the road center.
 W_r = Function('W_r', {s}, {MX(1)});        % Width right of the road center.
 
@@ -74,8 +74,8 @@ constr_ubx_e = [s_max;1;ubx_e_veh];
 %                      vehicle model (Architecture question).
 % cost_expr_ext_cost = T_final*(.0001*u^2 + .0001*omega^2);
 % cost_expr_ext_cost_e = T_final;
-cost_expr_ext_cost = dt;% + 0.001*u^2 + 0.001*omega^2;%(s-s_max)^2 + u^2;
-cost_expr_ext_cost_e = 0;
+cost_expr_ext_cost = 500*dt + t_engine*t_brake + 0.001*j_engine^2+0.001*j_brake^2;%(s-s_max)^2 + u^2;
+cost_expr_ext_cost_e = t_engine*t_brake;
 
 %% Generic part
 % (make local workspace a struct and pass to output

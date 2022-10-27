@@ -79,24 +79,5 @@ for ii=1:N_sim
     t = t+dt;
 end
 %% plot
-% close all;
-% ts = [0,cumsum(xtraj(4,:))];
-% ts = ts(1:end-1);
-% figure;
-% plot(ts,x_sim(1,:));
-% ylabel('s');
-% figure;
-% plot(ts,x_sim(2,:));
-% ylabel('n');
-% figure;
-% plot(ts,x_sim(3,:));
-% ylabel('alpha');
-% figure;
-% stairs(ts(1:end-1),u_sim(1,:));
-% figure;
-% stairs(ts(1:end-1),u_sim(2,:));
-% figure;
-% stairs(ts(1:end-1),u_sim(3,:));
-%%
 [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
 plot_solution(r_x,r_y,r_theta,r_s,x_sim,u_sim);

@@ -81,7 +81,7 @@ ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
 ocp_opts.set('globalization','merit_backtracking');
-ocp_opts.set('nlp_solver_max_iter', 5000);
+ocp_opts.set('nlp_solver_max_iter', 500);
 %ocp_opts.set('regularize_method','mirror');
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
@@ -100,7 +100,7 @@ ocp = acados_ocp(ocp_model, ocp_opts);
 
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
-x_traj_init(5,:) = 0.01;
+x_traj_init(5,:) = 1;
 x_traj_init(4,:) = 2;
 u_traj_init = zeros(nu, N);
 
@@ -124,23 +124,5 @@ xtraj = ocp.get('x');
 status = ocp.get('status'); % 0 - success
 ocp.print('stat')
 %% Plot
-% close all;
-% ts = [0,cumsum(xtraj(4,:))];
-% ts = ts(1:end-1);
-% figure;
-% plot(ts,xtraj(1,:));
-% ylabel('s');
-% figure;
-% plot(ts,xtraj(2,:));
-% ylabel('n');
-% figure;
-% plot(ts,xtraj(3,:));
-% ylabel('alpha');
-% figure;
-% stairs(ts(1:end-1),utraj(1,:));
-% figure;
-% stairs(ts(1:end-1),utraj(2,:));
-
-%%
 [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
 plot_solution(r_x,r_y,r_theta,r_s,xtraj,utraj);
