@@ -52,20 +52,22 @@ u_veh = [j_brake;j_engine;omega_steer];
 x_veh = [u;v;omega;t_brake;t_engine;delta];
 f_veh = [u_dot;v_dot;omega_dot;t_brake_dot;t_engine_dot;delta_dot];
 
-Jbx_veh = [0,0,0,0,0,1
-           1,0,0,0,0,0
+Jbx_veh = [1,0,0,0,0,0
+           0,1,0,0,0,0
            0,0,0,1,0,0
-           0,0,0,0,1,0];
-lbx_veh = [-1;0;0;0];
-ubx_veh = [1;5;1;1];
+           0,0,0,0,1,0
+           0,0,0,0,0,1];
+lbx_veh = [0;-1;0;0;-1];
+ubx_veh = [5;1;1;1;1];
 
 Jbu_veh = eye(3);
 lbu_veh = [-1;-1;-0.5];
 ubu_veh = [1;1;0.5];
 
-Jbx_e_veh = [];
-lbx_e_veh = [];
-ubx_e_veh = [];
+Jbx_e_veh = [0,0,0,1,0,0
+             0,0,0,0,1,0];
+lbx_e_veh = [0;0];
+ubx_e_veh = [1;1];
 
 Jbx0_veh = eye(6);
 x0_veh = zeros(6,1);
