@@ -17,6 +17,28 @@ plot(ts,v_traj(3,:));
 ylabel('$\alpha$','Interpreter','latex');
 
 %% Plot vehicle CG state
+
+figure;
+subplot(2,2,1);
+plot(ts,v_traj(5,:));
+ylabel('$u$','Interpreter','latex');
+subplot(2,2,2);
+plot(ts,v_traj(6,:));
+ylabel('$v$','Interpreter','latex');
+subplot(2,2,3);
+plot(ts,v_traj(7,:));
+ylabel('$\omega$','Interpreter','latex');
+subplot(2,2,4);
+plot(ts,v_traj(10,:));
+ylabel('$\delta$','Interpreter','latex');
+
+figure;
+subplot(2,1,1);
+plot(ts,v_traj(8,:));
+ylabel('$t_{\mathrm{brake}}$','Interpreter','latex');
+subplot(2,1,2);
+plot(ts,v_traj(9,:));
+ylabel('$t_{\mathrm{engine}}$','Interpreter','latex');
 %% Plot Controls
 figure;
 subplot(2,2,1);
