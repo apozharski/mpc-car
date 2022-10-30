@@ -20,7 +20,7 @@ qp_solver = 'partial_condensing_hpipm';
     % full_condensing_hpipm, partial_condensing_hpipm, full_condensing_qpoases, full_condensing_daqp
 qp_solver_cond_N = 100; % for partial condensing
 % integrator type
-sim_method = 'erk'; % erk, irk, irk_gnsf
+sim_method = 'irk'; % erk, irk, irk_gnsf
 
 %% model to create the solver
 ocp_model = acados_ocp_model();
@@ -32,7 +32,7 @@ ocp_model.set('T', T);
 % symbolics
 ocp_model.set('sym_x', model.sym_x);
 ocp_model.set('sym_u', model.sym_u);
-%ocp_model.set('sym_xdot', model.sym_xdot);
+ocp_model.set('sym_xdot', model.sym_xdot);
 
 % cost
 ocp_model.set('cost_type','ext_cost');
@@ -42,11 +42,11 @@ ocp_model.set('cost_expr_ext_cost_e', model.cost_expr_ext_cost_e);
 
 % dynamics
 % if (strcmp(sim_method, 'erk'))
-    ocp_model.set('dyn_type', 'explicit');
-    ocp_model.set('dyn_expr_f', model.expr_f_expl);
+    %ocp_model.set('dyn_type', 'explicit');
+    %ocp_model.set('dyn_expr_f', model.expr_f_expl);
 % else % irk irk_gnsf
-%     ocp_model.set('dyn_type', 'implicit');
-%     ocp_model.set('dyn_expr_f', model.expr_f_impl);
+    ocp_model.set('dyn_type', 'implicit');
+    ocp_model.set('dyn_expr_f', model.expr_f_impl);
 % end
 
 % constraints
@@ -81,12 +81,12 @@ ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
 ocp_opts.set('globalization','merit_backtracking');
-ocp_opts.set('nlp_solver_max_iter', 500);
-%ocp_opts.set('regularize_method','mirror');
+ocp_opts.set('nlp_solver_max_iter', 5000);
+%ocp_opts.set('regularize_method','convexify');
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
-%ocp_opts.set('warm_start_first_qp', 'true');
-ocp_opts.set('levenberg_marquardt', 10.0);
+%ocp_opts.set('exact_hess_cost', 'false');
+ocp_opts.set('levenberg_marquardt', 1000);
 ocp_opts.set('param_scheme_N', N);
 ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -100,7 +100,7 @@ ocp = acados_ocp(ocp_model, ocp_opts);
 
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
-x_traj_init(5,:) = 1;
+x_traj_init(5,:) = 1e-10;
 x_traj_init(4,:) = 2;
 u_traj_init = zeros(nu, N);
 
