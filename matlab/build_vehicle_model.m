@@ -64,35 +64,28 @@ f_v_dot = F_t_r + cos(delta)*F_t_f + sin(delta)*F_p_f - 0.5*C_v*v^2;
 f_omega_dot = -F_t_r*L_r + (cos(delta)*F_t_f + sin(delta)*F_p_f)*L_f;
 
 
-u_veh = [j_brake;j_engine;omega_steer];
-x_veh = [u;v;omega;t_brake;t_engine;delta];
-x_dot_veh = [u_dot;v_dot;omega_dot;t_brake_dot;t_engine_dot;delta_dot];
+u_veh = [t_brake;t_engine;omega_steer];
+x_veh = [u;v;omega;delta];
+x_dot_veh = [u_dot;v_dot;omega_dot;delta_dot];
 f_veh = [u_dot - dt*f_u_dot/mass
          v_dot - dt*f_v_dot/mass
          omega_dot - dt*f_omega_dot/I
-         t_brake_dot - dt*f_t_brake_dot
-         t_engine_dot - dt*f_t_engine_dot
          delta_dot - dt*f_delta_dot];
 
-Jbx_veh = [1,0,0,0,0,0
-           0,1,0,0,0,0
-           0,0,0,1,0,0
-           0,0,0,0,1,0
-           0,0,0,0,0,1];
-lbx_veh = [0;-1;0;0;-pi/4];
-ubx_veh = [30;1;1;1;pi/4];
+Jbx_veh = [0,0,0,1];
+lbx_veh = [-pi/4];
+ubx_veh = [pi/4];
 
 Jbu_veh = eye(3);
-lbu_veh = [-1;-1;-0.5];
+lbu_veh = [0;0;-0.5];
 ubu_veh = [1;1;0.5];
 
-Jbx_e_veh = [0,0,0,1,0,0
-             0,0,0,0,1,0];
-lbx_e_veh = [0;0];
-ubx_e_veh = [1;1];
+Jbx_e_veh = [];
+lbx_e_veh = [];
+ubx_e_veh = [];
 
-Jbx0_veh = eye(6);
-x0_veh = zeros(6,1);
+Jbx0_veh = eye(4);
+x0_veh = zeros(4,1);
 x0_veh(1) = 1e-10;
 %% Generic part
 % (make local workspace a struct and pass to output

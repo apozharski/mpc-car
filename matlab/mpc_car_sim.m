@@ -18,7 +18,7 @@ model_name =  'sim_car';
 % simulation parameters
 N_sim = 1000;
 h = 1; % simulation time
-x0 = [0; 0; 0; 0.01; 5; 0; 0; 0; 0; 0.0]; % initial state
+x0 = [0; 0; 0; 0.01; 5; 0; 0; 0.0]; % initial state
 %x0 = [0; 0; 0;xtraj(4,1);0]; % initial state
 u0 = [1,0.01;]; % control inputs
 

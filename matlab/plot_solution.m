@@ -29,24 +29,17 @@ subplot(2,2,3);
 plot(ts,v_traj(7,:));
 ylabel('$\omega$','Interpreter','latex','fontsize', 30);
 subplot(2,2,4);
-plot(ts,v_traj(10,:));
+plot(ts,v_traj(8,:));
 ylabel('$\delta$','Interpreter','latex','fontsize', 30);
 
-figure;
-subplot(2,1,1);
-plot(ts,v_traj(8,:));
-ylabel('$t_{\mathrm{brake}}$','Interpreter','latex','fontsize', 30);
-subplot(2,1,2);
-plot(ts,v_traj(9,:));
-ylabel('$t_{\mathrm{engine}}$','Interpreter','latex','fontsize', 30);
 %% Plot Controls
 figure;
 subplot(2,2,1);
 stairs(ts(1:end-1),v_u(1,:));
-ylabel('$j_{\textrm{brake}}$','Interpreter','latex','fontsize', 30);
+ylabel('$t_{\textrm{brake}}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,2);
 stairs(ts(1:end-1),v_u(2,:));
-ylabel('$j_{\textrm{engine}}$','Interpreter','latex','fontsize', 30);
+ylabel('$t_{\textrm{engine}}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
 stairs(ts(1:end-1),v_u(3,:));
 ylabel('$\omega_{\textrm{steer}}$','Interpreter','latex','fontsize', 30);
@@ -54,7 +47,7 @@ ylabel('$\omega_{\textrm{steer}}$','Interpreter','latex','fontsize', 30);
 %% Plot diagnostic internal state
 % TODO: pass in the whole model for constants
 % Slips
-slip_f = atan2((v_traj(6,:)+0.5*v_traj(7,:)),v_traj(5,:))-v_traj(10,:);
+slip_f = atan2((v_traj(6,:)+0.5*v_traj(7,:)),v_traj(5,:))-v_traj(8,:);
 slip_r = atan2((v_traj(6,:)+0.5*v_traj(7,:)),v_traj(5,:));
 figure;
 subplot(2,1,1);
@@ -66,19 +59,19 @@ ylabel('$\textrm{slip}_r$','Interpreter','latex','fontsize', 30);
 sgtitle('Slips','fontsize', 30);
 
 % Forces
-F_p_r = v_traj(9,:)-0.5*v_traj(8,:);
+F_p_r = v_u(2,:)-0.5*v_u(1,:);
 F_t_r = -5*slip_r*0.5;
-F_p_f = -0.5*v_traj(8,:);
+F_p_f = -0.5*v_u(1,:);
 F_t_f = -5*slip_f*0.5;
 figure;
 subplot(2,2,1);
-plot(ts,F_p_f);
+stairs(ts(1:end-1),F_p_f);
 ylabel('$F_{pf}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,2);
 plot(ts,F_t_f);
 ylabel('$F_{tf}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
-plot(ts,F_p_r);
+stairs(ts(1:end-1),F_p_r);
 ylabel('$F_{pr}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,4);
 plot(ts,F_t_r);
@@ -88,14 +81,14 @@ sgtitle('Forces','fontsize', 30)
 % force components
 figure;
 subplot(2,2,1);
-plot(ts,-sin(v_traj(10,:)).*F_t_f + cos(v_traj(10,:)).*F_p_f);
+plot(ts,-sin(v_traj(8,:)).*F_t_f + cos(v_traj(8,:)).*[F_p_f 0]);
 ylabel('$F_{fu}$','Interpreter','latex','fontsize', 30);
 yline(0,'--r');
 subplot(2,2,2);
-plot(ts,cos(v_traj(10,:)).*F_t_f + sin(v_traj(10,:)).*F_p_f);
+plot(ts,cos(v_traj(8,:)).*F_t_f + sin(v_traj(8,:)).*[F_p_f 0]);
 ylabel('$F_{fv}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
-plot(ts,F_p_r);
+plot(ts(1:end-1),F_p_r);
 ylabel('$F_{ru}$','Interpreter','latex','fontsize', 30);
 subplot(2,2,4);
 plot(ts,F_t_r);
@@ -109,7 +102,7 @@ v_n = v_traj(2,:);
 v_alpha = v_traj(3,:);
 v_u = v_traj(5,:);
 v_v = v_traj(6,:); 
-v_delta = v_traj(10,:);
+v_delta = v_traj(8,:);
 
 width = 3;
 % Calculate left and right hand side
