@@ -80,13 +80,13 @@ ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
-ocp_opts.set('globalization','merit_backtracking');
+%ocp_opts.set('globalization','merit_backtracking');
 ocp_opts.set('nlp_solver_max_iter', 5000);
-%ocp_opts.set('regularize_method','convexify');
+%ocp_opts.set('regularize_method','mirror');
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
 %ocp_opts.set('exact_hess_cost', 'false');
-ocp_opts.set('levenberg_marquardt', 1000);
+ocp_opts.set('levenberg_marquardt', 1);
 ocp_opts.set('param_scheme_N', N);
 ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -101,9 +101,13 @@ ocp = acados_ocp(ocp_model, ocp_opts);
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
 x_traj_init(5,:) = 1e-10;
-x_traj_init(4,:) = 2;
+x_traj_init(4,:) = 3;
 u_traj_init = zeros(nu, N);
-
+u_traj_init(2,:) = 1;
+init_delta = model.kappa(x_traj_init(1,:));
+init_delta = init_delta.full();
+%x_traj_init(7,:) = init_delta;
+x_traj_init(8,:) = init_delta;
 %% call ocp solver
 
 % set trajectory initialization

@@ -17,8 +17,8 @@ s_prime = MX.sym('s_prime');
 n_prime = MX.sym('n_prime');
 alpha_prime = MX.sym('alpha_prime');
 kappa = interpolant('kappa','bspline',{[0,10,20,30,40,50,70,120,160,200]},[0,.025,.05,0,-0.05,.01,-.025,-0.05,0.05,0]);    % deriv of orientation w.r.t s.
-%kappa = Function('kappa',{s}, {.5*cos(pi*s)})
-%kappa = Function('kappa',{s}, {0.1});
+%kappa = Function('kappa',{s}, {0.03*cos(0.01*pi*s)});
+%kappa = Function('kappa',{s}, {0.003});
 W_l = Function('W_l', {s}, {MX(-1)});       % Width Left of the road center.
 W_r = Function('W_r', {s}, {MX(1)});        % Width right of the road center.
 
@@ -64,8 +64,8 @@ constr_ubu = ubu_veh;
 constr_Jbx = blkdiag([0,1,0,0;0,0,1,0],Jbx_veh);
 zeros(size(constr_Jbx,1),nx-size(constr_Jbx,2))
 constr_Jbx = [constr_Jbx,zeros(size(constr_Jbx,1),nx-size(constr_Jbx,2))];
-constr_lbx = [-3;-pi/4;lbx_veh];
-constr_ubx = [3;pi/4;ubx_veh];
+constr_lbx = [-3;-pi/2;lbx_veh];
+constr_ubx = [3;pi/2;ubx_veh];
 % TODO use ACADOS h inequalities to model variable width.
 
 %% Build terminal constraints
