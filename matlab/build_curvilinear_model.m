@@ -8,7 +8,11 @@ if nargin == 1
 end
 %% Constants
 s_max = 200; % How long is the road
-
+kappa = interpolant('kappa','bspline',{[0,10,20,30,40,50,70,120,160,200]},[0,.025,.05,0,-0.05,.01,-.025,-0.05,0.05,0]);    % deriv of orientation w.r.t s.
+%kappa = Function('kappa',{s}, {0.03*cos(0.01*pi*s)});
+%kappa = Function('kappa',{s}, {0.003});
+W_l = Function('W_l', {s}, {MX(-1)});       % Width Left of the road center.
+W_r = Function('W_r', {s}, {MX(1)});        % Width right of the road center.
 %% Variable declaration
 s = MX.sym('s');                        % abscissa (distance along road).
 n = MX.sym('n');                        % normal distance to road.
@@ -16,12 +20,6 @@ alpha = MX.sym('alpha');                % angle of vehicle to road.
 s_prime = MX.sym('s_prime');
 n_prime = MX.sym('n_prime');
 alpha_prime = MX.sym('alpha_prime');
-kappa = interpolant('kappa','bspline',{[0,10,20,30,40,50,70,120,160,200]},[0,.025,.05,0,-0.05,.01,-.025,-0.05,0.05,0]);    % deriv of orientation w.r.t s.
-%kappa = Function('kappa',{s}, {0.03*cos(0.01*pi*s)});
-%kappa = Function('kappa',{s}, {0.003});
-W_l = Function('W_l', {s}, {MX(-1)});       % Width Left of the road center.
-W_r = Function('W_r', {s}, {MX(1)});        % Width right of the road center.
-
 
 dt_prime = MX.sym('dt_prime');
 
@@ -40,7 +38,7 @@ expr_f_impl = [s_prime - dt*f_s_prime
                n_prime - dt*f_n_prime
                alpha_prime - dt*f_alpha_prime
                dt_prime
-               f_veh]
+               f_veh];
 
 %% Build initial conditiona
 % Define vehicle as starting at the center of the beginning of the road
@@ -51,7 +49,7 @@ constr_Jbx_0 = blkdiag(eye(4),Jbx0_veh);
 constr_lbx_0 = [0;0;0;0;x0_veh];
 constr_ubx_0 = [0;0;0;3;x0_veh];
 
-%% Build constraints
+%% Build path constraints
 constr_Jbu = Jbu_veh;
 constr_lbu = lbu_veh;
 constr_ubu = ubu_veh;
@@ -67,7 +65,11 @@ constr_Jbx = [constr_Jbx,zeros(size(constr_Jbx,1),nx-size(constr_Jbx,2))];
 constr_lbx = [-3;-pi/2;lbx_veh];
 constr_ubx = [3;pi/2;ubx_veh];
 % TODO use ACADOS h inequalities to model variable width.
-
+% constr_h = [ n - W_l(s)
+%              n - W_r(s)
+%            ];
+% constr_lh =[0;1e15];
+% constr_uh =[-1e15;0];
 %% Build terminal constraints
 
 % Constrain us to be at the end of the track, with a reasonable angle to 
@@ -83,7 +85,7 @@ constr_ubx_e = [s_max;3;ubx_e_veh];
 %                      vehicle model (Architecture question).
 % cost_expr_ext_cost = T_final*(.0001*u^2 + .0001*omega^2);
 % cost_expr_ext_cost_e = T_final;
-cost_expr_ext_cost = 10*dt^2 + t_engine*t_brake + 0.001*t_engine^2+0.001*t_brake^2;%(s-s_max)^2 + u^2;
+cost_expr_ext_cost = 10*dt^2 + t_engine*t_brake + 0.01*t_engine^2 + 0.01*t_brake^2 + 0.01*omega_steer^2;%(s-s_max)^2 + u^2;
 cost_expr_ext_cost_e = 0;%t_engine*t_brake;
 
 %% Generic part
