@@ -29,20 +29,20 @@ delta_dot = MX.sym('delta_dot');
 j_brake = MX.sym('j_brake');
 j_engine = MX.sym('j_engine');
 %% constants
-L_r = 1;
-L_f = 1;
+L_r = 1.482;
+L_f = 1.118;
 L = L_r+L_f;
-k_engine = 1;
-k_brake = 1;
+k_engine = 1000;
+k_brake = 2000;
 brake_bias = 0.5;
-mass = 1;
-I = 1;
+mass = 1440;
+I = 1730;
 weight_bias = 0.5;
-k_r = 10;                 % Rear cornering stiffness
-k_f = 10;                 % Front cornering stiffness
+k_r = 29;                 % Rear cornering stiffness
+k_f = 29;                 % Front cornering stiffness
 
-C_u = 1e-2;
-C_v = 1e-3;
+C_u = 0.39;
+C_v = 0.39;
 
 %% vehicle model ODEs
 % Characteristic angles
@@ -59,8 +59,8 @@ F_t_f = -k_f*slip_f*(mass*(1-weight_bias));
 f_t_brake_dot = j_brake;
 f_t_engine_dot = j_engine;
 f_delta_dot = omega_steer; % steering rate
-f_u_dot = F_p_r - sin(delta)*F_t_f + cos(delta)*F_p_f - 0.5*C_u*u^2;
-f_v_dot = F_t_r + cos(delta)*F_t_f + sin(delta)*F_p_f - 0.5*C_v*v^2;
+f_u_dot = F_p_r - sin(delta)*F_t_f + cos(delta)*F_p_f - C_u*u^2;
+f_v_dot = F_t_r + cos(delta)*F_t_f + sin(delta)*F_p_f - C_v*v^2;
 f_omega_dot = -F_t_r*L_r + (cos(delta)*F_t_f + sin(delta)*F_p_f)*L_f;
 
 

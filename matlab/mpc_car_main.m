@@ -80,13 +80,15 @@ ocp_model.set('constr_ubx_e', model.constr_ubx_e);
 
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
-%ocp_opts.set('globalization','merit_backtracking');
+ocp_opts.set('globalization','merit_backtracking');
 ocp_opts.set('nlp_solver_max_iter', 5000);
-%ocp_opts.set('regularize_method','mirror');
+ocp_opts.set('regularize_method','mirror');
 %ocp_opts.set('param_scheme','multiple_shooting');
 %ocp_opts.set('nlp_solver_exact_hessian', 'true');
 %ocp_opts.set('exact_hess_cost', 'false');
-ocp_opts.set('levenberg_marquardt', 1);
+ocp_opts.set('nlp_solver_tol_stat', 1e-5);
+ocp_opts.set('qp_solver_warm_start', 1);
+ocp_opts.set('levenberg_marquardt', 0.1);
 ocp_opts.set('param_scheme_N', N);
 ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -97,17 +99,20 @@ ocp_opts.set('ext_fun_compile_flags', ''); % '-O2'
 
 %% create ocp solver
 ocp = acados_ocp(ocp_model, ocp_opts);
+dt_init = 3;
+tau = linspace(0,100,N+1);
 
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
-x_traj_init(5,:) = 1e-10;
-x_traj_init(4,:) = 3;
+x_traj_init(5,:) = linspace(1e-10,10,N+1);
+x_traj_init(4,:) = dt_init;
 u_traj_init = zeros(nu, N);
 u_traj_init(2,:) = 1;
 init_delta = model.kappa(x_traj_init(1,:));
 init_delta = init_delta.full();
-%x_traj_init(7,:) = init_delta;
+x_traj_init(7,:) = init_delta;
 x_traj_init(8,:) = init_delta;
+u_traj_init(3,:) = diff(init_delta)/dt_init;
 %% call ocp solver
 
 % set trajectory initialization
@@ -129,4 +134,4 @@ status = ocp.get('status'); % 0 - success
 ocp.print('stat')
 %% Plot
 [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
-plot_solution(r_x,r_y,r_theta,r_s,xtraj,utraj);
+plot_solution(r_x,r_y,r_theta,r_s,xtraj,utraj,model);
