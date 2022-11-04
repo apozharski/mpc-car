@@ -21,6 +21,7 @@
 \usepackage{twoopt}
 \usepackage{pgfplots}
 \usepackage{bm}
+\usepackage{IEEEtrantools}
 
 \usetikzlibrary{automata, positioning, arrows, calc, shapes.multipart}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
@@ -89,21 +90,22 @@
 
 \title{Time and Energy Optimal Control for a Single Track Modeled Vehicle.}
 
-\author{\IEEEauthorblockN{Adil}
-\IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
-Freiburg, Germany \\
-email
-\and
-\IEEEauthorblockN{Anton Pozharskiy}
+\author{\IEEEauthorblockN{Anton Pozharskiy}
 \IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
 Freiburg, Germany \\
 anton@pozhar.ski
 \and
-\IEEEauthorblockN{Mario}
+\IEEEauthorblockN{Mario Willaredt}
 \IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
 Freiburg, Germany \\
-email}
+mario-Willaredt@web.de
+\and
+\IEEEauthorblockN{Adil Younas}
+\IEEEauthorblockA{\textit{Albert-Ludwigs-Universität Freiburg}}
+Freiburg, Germany \\
+adil.younas@gmx.de
 }
+
 \maketitle
 
 \begin{abstract}
@@ -117,6 +119,61 @@ Optimal control
 \section{Introduction}
 
 \section{Definitions}
+
+\section{Formulation}
+\subsection{Dynamics}
+The model of the dynamic system can be broken up into the road model, the dynamics of the vehicle in the CG (center of gravity) frame, and the dynamics of the vehicle in the
+curvilinear coordinate system.
+\subsubsection{Road Model}
+The first challenge in formulating a vehicle model is modeling the road surface, which is generally a long narrow strip. This combined with the fact that roads generally do not
+form convex sets in euclidian space means that a different coordinate system is needed. For this purpose a curvilinear coordinate system is used. In this model the vehicle's
+position is represented by the distance along the center-line of the road ($s$), the distance perpendicular to the centerline ($n$), and the relative angle $\alpha$ to the direction
+of the road. The road's position in euclidean space is defined as in \cite{LOT20147559}, i.e. a normalized parametric curve which is defined by a single function $\kappa(s)$ which defines
+the rate of change which gives us the road road centerline coordinates as:
+
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  x' = cos(\theta) \label{eq:road1}\\
+  y' = cos(\theta) \label{eq:road2}\\
+  \theta' = \kappa(s) \label{eq:road3}
+\end{IEEEeqnarray}
+
+The $(s,n,\alpha)$ coordinate system is right handed as shown in Figure. (TODO). With this formulation the road is fully defined with the addition of a formalism for the road edges.
+The problem formulation addressed by ACADOS limits us to a single width function $w(s)$, which defines the symetric edges of the road $w_r$, $w_l$:
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  w_r = -w(s) \label{eq:width1}\\
+  w_l = w(s) \label{eq:width2}
+\end{IEEEeqnarray}
+
+\subsubsection{CG Dynamics}
+The CG dynamics of the vehicle is modeled using a bycicle model that takes into account the slip angles and forces exerted by the front and rear tires independently as shown in Figure. TODO.
+
+The state space of the CG dynamics is as follows:
+\begin{equation}
+  x = 
+  \begin{bmatrix}
+    u\\
+    v\\
+    \omega\\
+    \delta
+  \end{bmatrix}
+  \label{eq:state}
+\end{equation}
+The model has three degrees of freedom that are used as control variables: the brake torque $\tau_{\mathrm{brake}}$, the brake torque $\tau_{\mathrm{engine}}$, and the steering rate
+$\omega_{\mathrm{steer}}$. The vehicle is modeled as rear wheel drive only.
+
+Each tire experiences two forces transverse and parallel to the rolling axis of the tire. The parallel forces are defined as follows:
+
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  F_{fp} = -k_{\mathrm{brake}}\tau_{\mathrm{brake}} \label{eq:Fp1}\\
+  F_{rp} = k_{\mathrm{engine}}\tau_{\mathrm{engine}}-k_{\mathrm{brake}}\tau_{\mathrm{brake}}\label{eq:Fp1}
+\end{IEEEeqnarray}
+
+In 
+
+\subsubsection{Vehicle Dynamics}
 
 \section{Numerical Solution}
 
