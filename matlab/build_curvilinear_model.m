@@ -22,14 +22,17 @@ nx=length(sym_x);
 sym_u = [u_veh];                      % controls equivalent in vehicle frame.
 sym_p = [s_end];
 %% Constants
-s_max = 100; % How long is the road
-kappa = interpolant('kappa','bspline',{[0,10,20,30,40,50,70,120,160,200,210,220]},[0,.025,.05,0,-0.05,.01,-.025,-0.05,0.05,0,0.001,0.001]);    % deriv of orientation w.r.t s.
+s_finish = 300; % where is the finish line
+kappa = interpolant('kappa','bspline', ...
+    {[0,10,20,30,40,50,70,120,160,200,210,220,250,270,290]}, ...
+    [0,.025,.05,0,-0.05,.01,-.025,-0.05,0.05,0,0.05,-0.05,-0.01,0.02,0.05]);    % deriv of orientation w.r.t s.
+%kappa = interpolant('kappa','linear',{[0,20,30,125,130,170,180,285,290,300]},[0,pi/50,pi/100,pi/100,pi/50,0,-pi/100,-pi/100,-pi/50,0]);
 %kappa = Function('kappa',{s}, {0.03*cos(0.01*pi*s)});
 %kappa = Function('kappa',{s}, {0.003});
 W_l = Function('W_l', {s}, {MX(-3)});       % Width Left of the road center.
 W_r = Function('W_r', {s}, {MX(3)});        % Width right of the road center.
-%w_fun = Function('W_r', {s}, {MX(1)});
-w_fun = interpolant('w','linear',{[0,70,80,90,100,110,200]},[1,1,.6,.8,.6,1,1]);
+w_fun = Function('W_r', {s}, {MX(1)});
+%w_fun = interpolant('w','linear',{[0,70,80,90,100,110,200]},[1,1,.6,.8,.6,1,1]);
 %% Dynamics
 % Dynamics in curvilinear space (including clock state
 f_s_prime = (u*cos(alpha)-v*sin(alpha))/(1-n*kappa(s));
@@ -83,7 +86,7 @@ constr_uh_e =[0;3];
 %                      vehicle model (Architecture question).
 % cost_expr_ext_cost = T_final*(.0001*u^2 + .0001*omega^2);
 % cost_expr_ext_cost_e = T_final;
-cost_expr_ext_cost = 10*dt^2 + 1e-8*t_engine*t_brake + 1e-8*t_engine^2 + 1e-8*t_brake^2 + 1e-8*omega_steer^2;%(s-s_max)^2 + u^2;
+cost_expr_ext_cost = 10*dt^2 + 1e-6*t_engine*t_brake + 1e-6*t_engine^2 + 1e-6*t_brake^2 + 1e-6*omega_steer^2;%(s-s_max)^2 + u^2;
 cost_expr_ext_cost_e = 0;%t_engine*t_brake;
 
 %% Generic part
