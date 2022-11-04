@@ -11,7 +11,7 @@ s = MX.sym('s');
 
 f = [cos(theta);sin(theta);kappa(s)];
 
-grid = linspace(0,s_max,101);
+grid = linspace(0,s_max,201);
 
 ode = struct('x', [x;y;theta], 't', s, 'ode', f);
 opts = struct('grid',grid,'output_t0', true);

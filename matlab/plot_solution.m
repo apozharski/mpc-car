@@ -115,7 +115,7 @@ sgtitle('Force Components','fontsize', 30);
 
 % Lateral accel
 figure;
-plot(ts(1:end-1),dt.*(F_f_v + F_t_r(1:end-1))/model.mass);
+plot(ts(1:end-1),(F_f_v + F_t_r(1:end-1))/model.mass);
 ylabel('$\dot{v}$','Interpreter','latex','fontsize', 30);
 %% Plot road trajectory
 
@@ -126,7 +126,7 @@ r_rx = r_x + width.*sin(r_theta);
 r_ry = r_y - width.*cos(r_theta);
 
 % Calculate vehicle poses
-v_s(end) = model.s_max; %hack to fix nans
+%v_s(end) = model.s_max; %hack to fix nans
 v_theta = interp1(r_s,r_theta,v_s);
 v_x = interp1(r_s,r_x,v_s) - v_n.*sin(v_theta);
 v_y = interp1(r_s,r_y,v_s) + v_n.*cos(v_theta);
@@ -136,6 +136,8 @@ rotation = exp((v_theta+v_alpha)*1i);
 v_uv_rotated = rotation .* ([1 1i]*[v_u;v_v]);
 v_u_rotated = real(v_uv_rotated);
 v_v_rotated = imag(v_uv_rotated);
+v_magnitude = sqrt(v_v_rotated.^2 +v_u_rotated.^2);
+max_mag = max(v_magnitude);
 
 f=figure;
 hold on;
@@ -144,7 +146,7 @@ plot(r_lx,r_ly, 'r');
 plot(r_rx,r_ry, 'r');
 plot(v_x,v_y,'g');
 axis equal;
-quiver(v_x,v_y,v_u_rotated,v_v_rotated);
+quiver(v_x,v_y,v_u_rotated,v_v_rotated,10/max_mag);
 f.Position = [100 100 900 900];
 movegui(f,'center');
 

@@ -32,7 +32,7 @@ j_engine = MX.sym('j_engine');
 L_r = 1.482;
 L_f = 1.118;
 L = L_r+L_f;
-k_engine = 1000;
+k_engine = 3000;
 k_brake = 2000;
 brake_bias = 0.5;
 mass = 1440;
@@ -86,7 +86,7 @@ ubx_e_veh = [];
 
 Jbx0_veh = eye(4);
 x0_veh = zeros(4,1);
-x0_veh(1) = 30;
+x0_veh(1) = 50;
 %% Generic part
 % (make local workspace a struct and pass to output
 names = who;
