@@ -124,6 +124,7 @@ Optimal control
 \subsection{Dynamics}
 The model of the dynamic system can be broken up into the road model, the dynamics of the vehicle in the CG (center of gravity) frame, and the dynamics of the vehicle in the
 curvilinear coordinate system.
+
 \subsubsection{Road Model}
 The first challenge in formulating a vehicle model is modeling the road surface, which is generally a long narrow strip. This combined with the fact that roads generally do not
 form convex sets in euclidian space means that a different coordinate system is needed. For this purpose a curvilinear coordinate system is used. In this model the vehicle's
@@ -151,7 +152,7 @@ The CG dynamics of the vehicle is modeled using a bycicle model that takes into 
 
 The state space of the CG dynamics is as follows:
 \begin{equation}
-  x = 
+  x_{\mathrm{cg}} = 
   \begin{bmatrix}
     u\\
     v\\
@@ -160,20 +161,173 @@ The state space of the CG dynamics is as follows:
   \end{bmatrix}
   \label{eq:state}
 \end{equation}
-The model has three degrees of freedom that are used as control variables: the brake torque $\tau_{\mathrm{brake}}$, the brake torque $\tau_{\mathrm{engine}}$, and the steering rate
-$\omega_{\mathrm{steer}}$. The vehicle is modeled as rear wheel drive only.
+The model has three degrees of freedom that are used as control variables: the brake torque $\tau_{b}$, the brake torque $\tau_{e}$, and the steering rate
+$\omega_{\mathrm{steer}}$:
+\begin{equation}
+  \label{eq:control}
+  u =
+  \begin{bmatrix}
+    \tau_{b}\\
+    \tau_{e}\\
+    \omega_{\mathrm{steer}}
+  \end{bmatrix}
+\end{equation}
+The vehicle is modeled as rear wheel drive only.
 
 Each tire experiences two forces transverse and parallel to the rolling axis of the tire. The parallel forces are defined as follows:
 
 \begin{IEEEeqnarray}{C}
   \IEEEyesnumber \IEEEyessubnumber*
-  F_{fp} = -k_{\mathrm{brake}}\tau_{\mathrm{brake}} \label{eq:Fp1}\\
-  F_{rp} = k_{\mathrm{engine}}\tau_{\mathrm{engine}}-k_{\mathrm{brake}}\tau_{\mathrm{brake}}\label{eq:Fp1}
+  F_{fp} = -k_{\mathrm{brake}}\tau_{\mathrm{brake}} \label{eq:Ffp}\\
+  F_{rp} = k_{\mathrm{engine}}\tau_{\mathrm{engine}}-k_{\mathrm{brake}}\tau_{\mathrm{brake}}\label{eq:Frp}
 \end{IEEEeqnarray}
 
-In 
+The transverse forces are modeled as a linear w.r.t the slip angle of the tire. The direction of travel angles are defined as follows:
+
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  \tan\gamma_r = \frac{v - l_r\omega}{u}\label{eq:dotr}\\
+  \tan\gamma_f = \frac{v + l_f\omega}{u}\label{eq:dotf}
+\end{IEEEeqnarray}
+
+and the slip angles are:
+
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  \sigma_r = \gamma_r \label{eq:slipr}\\
+  \sigma_f = \gamma_f - \delta\label{eq:slipf}
+\end{IEEEeqnarray}
+the forces are then linear w.r.t the slip angles:
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  F_{ft} = -K_f\sigma_f N_f \label{eq:Fft}\\
+  F_{rt} = -K_r\sigma_r N_r\label{eq:Frt}
+\end{IEEEeqnarray}
+
+with $N_f$ and $N_r$ being the normal force on the tire in the front and rear respectively.
+
+The dynamics in the CG frame is then simply defined through simple euclidean kinematics:
+
+\begin{equation}
+  \label{eq:cgdyn}
+  \dot{x}_{\mathrm{cg}} =
+  \begin{bmatrix}
+    F_{rp} + F_{fp}\cos\delta - F_{ft}\sin\delta\\
+    F_{rf} + F_{fp}\sin\delta + F_{ft}\cos\delta\\
+    -l_rF_{rt} + l_f\paren{F_{ft}\cos\delta + F_{fp}\sin\delta}\\
+    \omega_{\mathrm{steer}}
+  \end{bmatrix}
+\end{equation}
 
 \subsubsection{Vehicle Dynamics}
+The dynamics of the vehicle in the curvilinear frame can be entirely separated from the CG dynamics as long as the CG dynamics provide $u$, $v$, and $\omega$.
+The state of the system in the curvilinear state is:
+\begin{equation}
+  \label{eq:curvstate}
+  x_{\mathrm{curv}}=
+  \begin{bmatrix}
+    s\\
+    n\\
+    \alpha
+  \end{bmatrix}
+\end{equation}
+Given these states we can define the dynamics:
+
+\begin{equation}
+  \label{eq:curvdyn}
+  \dot{x}_{\mathrm{curv}}=
+  \begin{bmatrix}
+    \frac{u\cos\alpha - v\sin\alpha}{1-n\kappa(s)}\\
+    u\sin\alpha + v\cos\alpha\\
+    \omega - \kappa(s)\frac{u\cos\alpha - v\sin\alpha}{1-n\kappa(s)}
+  \end{bmatrix}
+\end{equation}
+
+With these dynamics defined the dynamics of the whole system are defined as:
+
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  x_{\mathrm{dyn}} =
+  \begin{bmatrix}
+    x_{\mathrm{curv}}\\
+    x_{\mathrm{cg}}
+  \end{bmatrix}
+  \label{eq:fullstate}\\
+  \dot{x}_{\mathrm{dyn}} =
+  \begin{bmatrix}
+    \dot{x}_{\mathrm{curv}}\\
+    \dot{x}_{\mathrm{cg}}
+  \end{bmatrix}
+  \label{eq:fulldyn}
+\end{IEEEeqnarray}
+
+\subsection{Problem Formulation}
+The MPC problem is solved using the ACADOS tool \cite{Verschueren2021}, which treats a specific problem formulation.
+In order to formulate the time optimal problem, a new state $\Delta_t$ is introduced that represents the speed of time. This gives the normalized dynamics:
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  x_{\mathrm{topt}} =
+  \begin{bmatrix}
+    x_{\mathrm{curv}}\\
+    \Delta_t\\
+    x_{\mathrm{cg}}
+  \end{bmatrix}
+  \label{eq:toptstate}\\
+  \dot{x}_{\mathrm{topt}} = \Delta_t
+  \begin{bmatrix}
+    \dot{x}_{\mathrm{curv}}\\
+    0\\
+    \dot{x}_{\mathrm{cg}}
+  \end{bmatrix}
+  \label{eq:toptdyn}
+\end{IEEEeqnarray}
+These dynamics are reformulated into implicit dynamics in order to use the implicit Runge-Kutta methods provided in ACADOS:
+\begin{equation}
+  \label{eq:fimpl}
+  f_{\mathrm{impl}}(x_{\mathrm{topt}},\dot{x}_{\mathrm{topt}},u)=
+  \dot{x}_{\mathrm{topt}} - \Delta_t
+  \begin{bmatrix}
+    \dot{x}_{\mathrm{curv}}\\
+    0\\
+    \dot{x}_{\mathrm{cg}}
+  \end{bmatrix}
+\end{equation}
+This then gives us the following formulation of the optimal control problem:
+% TODO: figure out the correct way to do the alignment here.
+\begin{IEEEeqnarray}{ll}
+  \IEEEnonumber \displaystyle
+  \min_{x_{\mathrm{topt}}(\cdot),u(\cdot)}\int_{0}^{1} \Delta_t^2&+10^{-6}\tau_{e}\tau_{b}\\
+  \IEEEnonumber&+10^{-6}\tau_{e}^2\\
+  \IEEEnonumber&+10^{-6}\tau_{b}^2\\ 
+  \IEEEyesnumber\IEEEyessubnumber*&+10^{-6}\omega_{\mathrm{steer}}^2   \label{eq:prob1}
+\end{IEEEeqnarray}
+
+subject to the equality constraints with $\tau$ dependence dropped where convenient:
+
+\begin{IEEEeqnarray}{rcl'r}
+  \IEEEyessubnumber*
+  f_{\mathrm{impl}}(x_{\mathrm{topt}},\dot{x}_{\mathrm{topt}},u) &=& 0 & \tau \in  (0,1]\label{eq:prob2}\\
+  x_{\mathrm{curv}}(0) &=& x_{\mathrm{curv}0} &\label{eq:prob3}\\
+  x_{\mathrm{cg}}(0) &=& x_{\mathrm{cg}0} &\label{eq:prob4}\\
+  s(1) &=& s_{\mathrm{max}} &\label{eq:prob5}
+\end{IEEEeqnarray}
+
+And the inequality constraints:
+\begin{IEEEeqnarray}{rcl'r}
+  \IEEEyessubnumber*
+  0&\le \Delta_t(0) \le& 3 &\label{eq:prob6}\\
+  -1 &\le \frac{n(\tau)}{w(s(\tau))} \le& 1 & \tau \in  (0,1)\label{eq:prob7}\\
+  -\frac{\pi}{2} &\le \alpha(\tau) \le& \frac{\pi}{2} & \tau \in  (0,1)\label{eq:prob8}\\
+  -\frac{\pi}{4} &\le \delta(\tau) \le& \frac{\pi}{4} & \tau \in  (0,1)\label{eq:prob9}\\
+  0 &\le \tau_e(\tau) \le& 1  & \tau \in  (0,1)\label{eq:prob10}\\
+  0 &\le \tau_b(\tau) \le& 1 & \tau \in  (0,1)\label{eq:prob11}\\
+  -0.5 &\le \omega_{\mathrm{steer}}(\tau) \le& 0.5 & \tau \in  (0,1)\label{eq:prob12}\\
+\end{IEEEeqnarray}
+
+The primary cost in Equation. (\ref{eq:prob1}) is the square of the speed of time variable $\Delta_t$. This enforces the time optimality target of the optimal control problem.
+The cross term $\tau_e\tau_b$ is introduced to minimize application of engine torque and brakes at the same time, and the remaining cost terms are to enforce minimality of control inputs.
+Equation (\ref{eq:prob2}) is the dynamics of the system, Equations (\ref{eq:prob3}), (\ref{eq:prob4}), and (\ref{eq:prob6}) set the initial conditions of the system including range of values that
+the free variable of $\Delta_t$ can take. The remaining inequalities represent the physical limits of the system.
 
 \section{Numerical Solution}
 
