@@ -1,4 +1,4 @@
-function f = plot_solution(r_x,r_y,r_theta,r_s,v_traj,v_control,model,ts)
+function f = plot_solution(r_x,r_y,r_theta,r_s,v_traj,v_control,model,ts,visible)
 %UNTITLED6 Summary of this function goes here
 %   Detailed explanation goes here
 close all;
@@ -12,11 +12,11 @@ v_v = v_traj(6,:);
 v_omega = v_traj(7,:);
 v_delta = v_traj(8,:);
 w_fun = model.w_fun(r_s);
-width = 3*w_fun.full();
+width = model.base_width*w_fun.full();
 
 dt = diff(ts);
 %% Plot vehicle Curvilinear state
-figure;
+figure('Visible',visible);
 subplot(2,2,1);
 plot(ts,v_s);
 ylabel('$s$','Interpreter','latex','fontsize', 30);
@@ -30,7 +30,7 @@ ylabel('$\alpha$','Interpreter','latex','fontsize', 30);
 %% Plot vehicle CG state
 kappa = model.kappa(v_s);
 kappa = kappa.full();
-figure;
+figure('Visible',visible);
 subplot(2,2,1);
 plot(ts,v_u);
 ylabel('$u$','Interpreter','latex','fontsize', 30);
@@ -41,14 +41,14 @@ subplot(2,2,3);
 hold on;
 plot(ts,v_omega);
 ylabel('$\omega$','Interpreter','latex','fontsize', 30);
-plot(ts,kappa,"--r");
+plot(ts,v_u.*kappa,"--r");
 hold off;
 subplot(2,2,4);
 plot(ts,v_delta);
 ylabel('$\delta$','Interpreter','latex','fontsize', 30);
 
 %% Plot Controls
-figure;
+figure('Visible',visible);
 subplot(2,2,1);
 stairs(ts(1:end-1),model.k_brake*v_control(1,:));
 ylabel('$t_{\textrm{brake}}$','Interpreter','latex','fontsize', 30);
@@ -64,7 +64,7 @@ ylabel('$\omega_{\textrm{steer}}$','Interpreter','latex','fontsize', 30);
 % Slips
 slip_f = atan2((v_v+model.L_f*v_omega),v_u)-v_delta;
 slip_r = atan2((v_v-model.L_r*v_omega),v_u);
-figure;
+figure('Visible',visible);
 subplot(2,1,1);
 plot(ts,slip_f);
 ylabel('$\textrm{slip}_f$','Interpreter','latex','fontsize', 30);
@@ -75,10 +75,10 @@ sgtitle('Slips','fontsize', 30);
 
 % Forces
 F_p_r = model.k_engine*v_control(2,:)-model.k_brake*model.brake_bias*v_control(1,:);
-F_t_r = -model.k_r*slip_r*(model.mass*model.weight_bias);
+F_t_r = -model.k_r*slip_r*(model.mass*model.g*model.weight_bias);
 F_p_f = -model.k_brake*(1-model.brake_bias)*v_control(1,:);
-F_t_f = -model.k_f*slip_f*(model.mass*(1-model.weight_bias));
-figure;
+F_t_f = -model.k_f*slip_f*(model.mass*model.g*(1-model.weight_bias));
+figure('Visible',visible);
 subplot(2,2,1);
 stairs(ts(1:end-1),F_p_f);
 ylabel('$F_{pf}$','Interpreter','latex','fontsize', 30);
@@ -93,11 +93,22 @@ plot(ts,F_t_r);
 ylabel('$F_{tr}$','Interpreter','latex','fontsize', 30);
 sgtitle('Forces','fontsize', 30)
 
+% force constraint
+figure('Visible',visible);
+subplot(2,1,1);
+plot(ts(1:end-1),sqrt(F_p_f.^2+F_t_f(1:end-1).^2));
+ylabel('$|F_{f}|$','Interpreter','latex','fontsize', 30);
+yline((model.grip_coef*model.mass*model.g*(1-model.weight_bias)));
+subplot(2,1,2);
+plot(ts(1:end-1),sqrt(F_p_r.^2+F_t_r(1:end-1).^2));
+yline((model.grip_coef*model.mass*model.g*(model.weight_bias)));
+ylabel('$|F_{r}|$','Interpreter','latex','fontsize', 30);
+
 % force components
 F_f_u = -sin(v_traj(8,1:end-1)).*F_t_f(1:end-1) + cos(v_traj(8,1:end-1)).*F_p_f;
 F_f_v = cos(v_traj(8,1:end-1)).*F_t_f(1:end-1) + sin(v_traj(8,1:end-1)).*F_p_f;
 
-figure;
+figure('Visible',visible);
 subplot(2,2,1);
 plot(ts(1:end-1),F_f_u);
 ylabel('$F_{fu}$','Interpreter','latex','fontsize', 30);
@@ -114,7 +125,7 @@ ylabel('$F_{rv}$','Interpreter','latex','fontsize', 30);
 sgtitle('Force Components','fontsize', 30);
 
 % Lateral accel
-figure;
+figure('Visible',visible);
 plot(ts(1:end-1),(F_f_v + F_t_r(1:end-1))/model.mass);
 ylabel('$\dot{v}$','Interpreter','latex','fontsize', 30);
 %% Plot road trajectory
@@ -139,7 +150,7 @@ v_v_rotated = imag(v_uv_rotated);
 v_magnitude = sqrt(v_v_rotated.^2 +v_u_rotated.^2);
 max_mag = max(v_magnitude);
 
-f=figure;
+f=figure('Visible',visible);
 hold on;
 plot(r_x,r_y, 'b');
 plot(r_lx,r_ly, 'r');

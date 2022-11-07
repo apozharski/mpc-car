@@ -10,7 +10,7 @@ Nsim = 300;
 model_name = 'mpc_car';
 model = build_vehicle_model;
 model = build_curvilinear_model(model);
-model.s_max = 200;
+
 %% Sizes
 nx = length(model.sym_x);
 nu = length(model.sym_u);
@@ -27,7 +27,7 @@ end
 
 qp_solver = 'partial_condensing_hpipm';
     % full_condensing_hpipm, partial_condensing_hpipm, full_condensing_qpoases, full_condensing_daqp
-qp_solver_cond_N = 10; % for partial condensing
+qp_solver_cond_N = 50; % for partial condensing
 % integrator type
 sim_method = 'irk'; % erk, irk, irk_gnsf
 
@@ -80,16 +80,18 @@ ocp_model.set('constr_uh_e', model.constr_uh_e);
 
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
-ocp_opts.set('globalization','merit_backtracking');
+%ocp_opts.set('globalization','merit_backtracking');
+ocp_opts.set('alpha_min',0.5);
 ocp_opts.set('nlp_solver_max_iter', 1000);
-ocp_opts.set('regularize_method','mirror');
+%ocp_opts.set('regularize_method','project');
 ocp_opts.set('nlp_solver_step_length',1);
 %ocp_opts.set('param_scheme','multiple_shooting');
-%ocp_opts.set('nlp_solver_exact_hessian', 'true');
-%ocp_opts.set('exact_hess_cost', 'false');
+ocp_opts.set('nlp_solver_exact_hessian', 'true');
+ocp_opts.set('exact_hess_cost', 0);
+ocp_opts.set('exact_hess_dyn', 0);
 ocp_opts.set('nlp_solver_tol_stat', 1e-4);
 %ocp_opts.set('qp_solver_warm_start', 1);
-ocp_opts.set('levenberg_marquardt', 0.1);
+ocp_opts.set('levenberg_marquardt', 0.01);
 ocp_opts.set('param_scheme_N', N);
 %ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -103,19 +105,22 @@ ocp = acados_ocp(ocp_model, ocp_opts);
 ocp_opts.set('nlp_solver', 'sqp');
 mpc_ocp = acados_ocp(ocp_model, ocp_opts);
 dt_init = 0.1;
+model.s_max = dt_init*N*model.x0_veh(1);
 tau = linspace(0,model.s_max,N+1);
+
 
 x_traj_init = zeros(nx, N+1);
 x_traj_init(1,:) = linspace(0,model.s_max,N+1);
-x_traj_init(5,:) = linspace(30,35,N+1);
+x_traj_init(5,:) = linspace(model.x0_veh(1),model.x0_veh(1),N+1);
 x_traj_init(4,:) = dt_init;
 u_traj_init = zeros(nu, N);
-u_traj_init(2,:) = 0;
+u_traj_init(1,:) = 0.5;
+u_traj_init(2,:) = 0.5;
 init_delta = model.kappa(x_traj_init(1,:));
 init_delta = init_delta.full();
-x_traj_init(7,:) = init_delta;
-x_traj_init(8,:) = init_delta;
-u_traj_init(3,:) = diff(init_delta)/dt_init;
+x_traj_init(7,:) = 0.001*init_delta;
+x_traj_init(8,:) = 0.001*init_delta;
+u_traj_init(3,:) = 0.001*diff(init_delta)/dt_init;
 
 if mpc
     %% Simulation
@@ -174,7 +179,7 @@ if mpc
         
         x1 = mpc_ocp.get('x', 1);
         ds = x1(1)-x0(1);
-        model.s_max = x1(1)+200;
+        model.s_max = x1(1)+dt_init*N*x1(5);
         x_sim = [x_sim,x1];
         model.constr_lbx_0(update_vec) = x1(update_vec);
         model.constr_ubx_0(update_vec) = x1(update_vec);
@@ -190,7 +195,7 @@ if mpc
             dt = x(4,1);
             ts = ts(1:end-1);
             [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
-            f = plot_solution(r_x,r_y,r_theta,r_s,x,u,model,ts);
+            f = plot_solution(r_x,r_y,r_theta,r_s,x,u,model,ts,'off');
             frame = getframe(f);
             frame = imresize(frame.cdata,[910,893]);
             writeVideo(video,frame);
@@ -211,7 +216,7 @@ if mpc
     close(video);
     %% Plot
     [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_finish);
-    plot_solution(r_x,r_y,r_theta,r_s,x_sim,u_sim,model,t_sim);
+    plot_solution(r_x,r_y,r_theta,r_s,x_sim,u_sim,model,t_sim,'on');
 else
     %% call ocp solver
     % set trajectory initialization
