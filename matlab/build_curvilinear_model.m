@@ -73,6 +73,18 @@ constr_uh =[base_width;uh_veh];
 % constr_expr_h = [n/w_fun(s)];
 % constr_lh =[-base_width];
 % constr_uh =[base_width];
+
+%%  Build path slacks
+nh = length(constr_expr_h);
+nsh = 3;
+constr_Jsh = zeros(nh, nsh);
+constr_Jsh(1,1) = 1;
+constr_Jsh(2,2) = 1;
+constr_Jsh(3,3) = 1;
+cost_zl = 100 * ones(nsh,1);
+cost_zu = 100 * ones(nsh,1);
+cost_Zl = 0 * eye(nsh);
+cost_Zu = 0 * eye(nsh);
 %% Build terminal constraints
 
 % Constrain us to be at the end of the track, with a reasonable angle to 

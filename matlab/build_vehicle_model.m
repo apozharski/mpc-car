@@ -94,7 +94,7 @@ ubx_e_veh = [];
 
 Jbx0_veh = eye(4);
 x0_veh = zeros(4,1);
-x0_veh(1) = 40;
+x0_veh(1) = 60;
 %% Generic part
 % (make local workspace a struct and pass to output
 names = who;
