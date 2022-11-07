@@ -93,7 +93,8 @@ ocp_opts.set('nlp_solver_max_iter', 1000);
 %ocp_opts.set('regularize_method','convexify');
 ocp_opts.set('nlp_solver_step_length',1);
 %ocp_opts.set('param_scheme','multiple_shooting');
-%ocp_opts.set('nlp_solver_exact_hessian', 'true');
+ocp_opts.set('nlp_solver_exact_hessian', 'true');
+ocp_opts.set('exact_hess_constr', 0);
 ocp_opts.set('exact_hess_cost', 0);
 ocp_opts.set('exact_hess_dyn', 0);
 ocp_opts.set('nlp_solver_tol_stat', 1e-4);
@@ -143,8 +144,8 @@ if mpc
     ocp.set('p',[model.s_max]);
     %ocp.solve();
     % get solution for initial conditions.
-    %utraj = ocp.get('u');
-    %xtraj = ocp.get('x');
+    %u_traj_init = ocp.get('u');
+    %x_traj_init = ocp.get('x');
     mpc_ocp.set('init_x', x_traj_init);
     mpc_ocp.set('init_u', u_traj_init);
     mpc_ocp.set('init_pi', zeros(nx, N)); 
@@ -184,7 +185,7 @@ if mpc
             dt = x(4,1);
             ts = ts(1:end-1);
             [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
-            f = plot_solution(r_x,r_y,r_theta,r_s,x,u,model,ts,'on');
+            f = plot_solution(r_x,r_y,r_theta,r_s,x,u,model,ts,'off');
             frame = getframe(f);
             frame = imresize(frame.cdata,[910,893]);
             writeVideo(video,frame);

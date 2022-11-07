@@ -26,8 +26,8 @@ s_finish = 300; % where is the finish line
 % kappa = interpolant('kappa','bspline', ...
 %     {[0,20,40,60,80,100,140,240,320,400,420,440,500,540,580]}, ...
 %     [0,.0125,.025,0,-0.025,.005,-.0125,-0.025,0.025,0,0.025,-0.025,-0.005,0.01,0.025]);    % deriv of orientation w.r.t s.
-kappa = interpolant('kappa','linear',{[0,200,210,250,260,1000]},[1e-5,1e-5,pi/100,pi/100,1e-5,1e-5]);
-%kappa = Function('kappa',{s}, {0.03*cos(0.01*pi*s)});
+kappa = interpolant('kappa','linear',{[0,200,200.1,209.9,210,1000]},[1e-5,1e-5,pi/20,pi/20,1e-5,1e-5]);
+%kappa = Function('kappa',{s}, {0.03*cos(0.01*pi*s)});[
 %kappa = Function('kappa',{s}, {0.01});
 W_l = Function('W_l', {s}, {MX(-3)});       % Width Left of the road center.
 W_r = Function('W_r', {s}, {MX(3)});        % Width right of the road center.
