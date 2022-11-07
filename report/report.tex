@@ -117,7 +117,15 @@ Optimal control
 \end{IEEEkeywords}
 
 \section{Introduction}
+Optimal control has become a popular paradigm of controller design in a multitude of autonomous vehicle projects. There also exists prior work on model predictive control as applied specifically
+to the target of the project: time optimal planning and control \cite{Verschueren2014a}\cite{LOT20147559}. In this project we attempt to formulate true time optimal controller that takes into
+account a tire model with slip angles and independent tire forces. Generally optimal control and MPC algorithms must tradeoff the complexity of the dynamic model and speed of the solver. In the
+past work it is very common for the authors to use simple slip free bicycle model to implement the vehicle dynamics, however there are often interesting behaviors such as countersteer and tire
+dynamics that are not modeled.
 
+The path planning aspect of the time optimal driving problem provides the primary difficulty of the approch taken in this project, along with the severe nonlinearity introduced not just by the
+tire model, but also by the commonly used time optimality reformulation that takes the ``speed of time'' as as an optimization variable. This nonlinearity often leads to local minima and makes the
+problem highly sensitive to initialization and hyperparameters.
 \section{Definitions}
 
 \section{Formulation}
@@ -147,8 +155,14 @@ The problem formulation addressed by ACADOS limits us to a single width function
   w_l = w(s) \label{eq:width2}
 \end{IEEEeqnarray}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics{curvilinear2.pdf}
+  \caption{curvilinear coordinate system}
+  \label{fig:curv}
+\end{figure}
 \subsubsection{CG Dynamics}
-The CG dynamics of the vehicle is modeled using a bycicle model that takes into account the slip angles and forces exerted by the front and rear tires independently as shown in Figure. TODO.
+The CG dynamics of the vehicle is modeled using a bycicle model (Figure. \ref{fig:cg}) that takes into account the slip angles and forces exerted by the front and rear tires independently.
 
 The state space of the CG dynamics is as follows:
 \begin{equation}
@@ -173,13 +187,18 @@ $\omega_{\mathrm{steer}}$:
   \end{bmatrix}
 \end{equation}
 The vehicle is modeled as rear wheel drive only.
-
-Each tire experiences two forces transverse and parallel to the rolling axis of the tire. The parallel forces are defined as follows:
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.6]{tire_model.pdf}
+  \caption{Forces acting on a tire.}
+  \label{fig:tire}
+\end{figure}
+Each tire experiences two forces transverse and parallel to the rolling axis of the tire as shown in Figure. \ref{fig:tire} \ The parallel forces are defined as follows:
 
 \begin{IEEEeqnarray}{C}
   \IEEEyesnumber \IEEEyessubnumber*
-  F_{fp} = -k_{\mathrm{brake}}\tau_{\mathrm{brake}} \label{eq:Ffp}\\
-  F_{rp} = k_{\mathrm{engine}}\tau_{\mathrm{engine}}-k_{\mathrm{brake}}\tau_{\mathrm{brake}}\label{eq:Frp}
+  F_{fp} = -k_{\mathrm{b}}\tau_{\mathrm{b}} \label{eq:Ffp}\\
+  F_{rp} = k_{\mathrm{e}}\tau_{\mathrm{e}}-k_{\mathrm{b}}\tau_{\mathrm{b}}\label{eq:Frp}
 \end{IEEEeqnarray}
 
 The transverse forces are modeled as a linear w.r.t the slip angle of the tire. The direction of travel angles are defined as follows:
@@ -219,6 +238,12 @@ The dynamics in the CG frame is then simply defined through simple euclidean kin
   \end{bmatrix}
 \end{equation}
 
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.6]{vehicle_model.pdf}
+  \caption{CG coordinate system}
+  \label{fig:cg}
+\end{figure}
 \subsubsection{Vehicle Dynamics}
 The dynamics of the vehicle in the curvilinear frame can be entirely separated from the CG dynamics as long as the CG dynamics provide $u$, $v$, and $\omega$.
 The state of the system in the curvilinear state is:
@@ -322,22 +347,171 @@ And the inequality constraints:
   0 &\le \tau_e(\tau) \le& 1  & \tau \in  (0,1)\label{eq:prob10}\\
   0 &\le \tau_b(\tau) \le& 1 & \tau \in  (0,1)\label{eq:prob11}\\
   -0.5 &\le \omega_{\mathrm{steer}}(\tau) \le& 0.5 & \tau \in  (0,1)\label{eq:prob12}\\
+  &F_{rp}^2 + F_{rt}^2 \le& (\mu N_r)^2 & \tau \in  (0,1)\label{eq:prob13}\\
+  &F_{fp}^2 + F_{ft}^2 \le& (\mu N_f)^2 & \tau \in  (0,1)\label{eq:prob14}
 \end{IEEEeqnarray}
 
 The primary cost in Equation. (\ref{eq:prob1}) is the square of the speed of time variable $\Delta_t$. This enforces the time optimality target of the optimal control problem.
 The cross term $\tau_e\tau_b$ is introduced to minimize application of engine torque and brakes at the same time, and the remaining cost terms are to enforce minimality of control inputs.
 Equation (\ref{eq:prob2}) is the dynamics of the system, Equations (\ref{eq:prob3}), (\ref{eq:prob4}), and (\ref{eq:prob6}) set the initial conditions of the system including range of values that
-the free variable of $\Delta_t$ can take. The remaining inequalities represent the physical limits of the system.
+the free variable of $\Delta_t$ can take. The remaining inequalities represent the physical limits of the system. In particular the last two inequalities are crucial to realistic modeling of the
+vehicle and provide the grip limits of the tires, similarly to the approach taken in \cite{LOT20147559}.
+
+In order to improve the convergence properties we introduce slack variables
+with $L_1$ penalties to the inequalities in Equations (\ref{eq:prob7}), (\ref{eq:prob13}), and (\ref{eq:prob14}).
 
 \section{Numerical Solution}
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.25]{hairpin_brake.jpg}
+  \caption{Trajectory followed by the vehicle in the high speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_brake_curv.jpg}
+  \caption{Curvilinear coordinates of vehicle in the high speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_brake_cg.jpg}
+  \caption{Center of gravity dynamics of the vehicle in the high speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_brake_u.jpg}
+  \caption{Controls in the high speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+\subsection{Solver Options}
+The problem formulated above is solved using the ACADOS package. Due to inconsistency in convergence behavior from problem instance to problem instance some parameters were tuned specifically to
+get convergent results. These will be discussed in the conclusions and further explorations sections of this report. However there were several consistent parameters that were used for
+all the following experiments.
+
+The dynamics are discretized using a 4th order implicit Runge-Kutta method with $N = 50$. Globalization is done through the merit function backtracking feature provided in the ACADOS package, using
+default settings. The reqired stopping tolerances for stationarity and inequality are set to $10^{-4}$ and $10^{-5}$ respectively. The problem is then solved using the standard SQP (sequential
+quadratic programming) approach (the real time iteration approach will be discussed in the Conclusions section). The QPs formed in the SQP method are solved using the partial condensing HPIPM
+\cite{FRISON2003} method.
+\begin{table}[t]
+  \centering
+  \begin{tabular}{l|r}
+    Contant & Value \\\hline
+    $m$& 1440 kg\\
+    $I$&1730 kgm$^2$\\
+    $l_f$&1.482 m\\
+    $l_r$&1.118 m\\
+    $k_e$&$10^4$\\
+    $k_b$&$2\times 10^4$\\
+    $b_b$&0.5\\
+    $m_b$&0.5\\
+    $K_r$&29\\
+    $K_f$&29\\
+    $C_u$&0.039$\frac{\mathrm{N}\mathrm{s}^2}{\mathrm{m}^2}$\\
+    $C_v$&0.039$\frac{\mathrm{N}\mathrm{s}^2}{\mathrm{m}^2}$\\
+    $\mu$&1.2\\
+  \end{tabular}
+  \caption{Vehicle constants}
+  \label{tab:vef}
+\end{table}
+\subsection{Initialization and Warm Starting}
+Initialization of the ACADOS solver plays a very important role in the convergence behavior of the controller. In this case the apriori knowledge of the curvature of the road is used in order to
+initialize $\omega$, $\delta$, and $\omega_{\mathrm{steer}}$. The remaining state variables are initialized through simple linear interpolation. As the problem solves time domain optimization, there
+is a risk if $s_{\mathrm{max}}$, is too small then the resulting $\Delta_t$ may be too small and would overestimate the capability of the vehicle. As such $s_{\mathrm{max}}$ is iterated via a
+constant target $\Delta_t$ (in the case of the below experiments $\Delta_t = 0.1$) and $s_{\mathrm{max},i+1}= s_i + N\Delta_tu_i$ to approximate distance traveled at a constant speed in time
+$N\Delta_t$. 
+
+Warm starting is done via a simple shift in the old control and state solutions and then the addition of a final state with $s = s_{\mathrm{max}}$. This warmstarting improves the convergence
+of the optimization routine but also may cause issues with local minima in particularly difficult corners, which even the existing globalization algorithm fails to recover from when those solutions
+disappear.
 
 \section{Results}
+\subsection{Experimental Setup}
+
+Several experiments were run to evaluate the behavior of the MPC cortroller corresponding to several common corner types. The vehicle modeled is similar to the one decribed in \cite{LOT20147559}.
+The Vehicle constants are listed in Table. TODO.
+
+\subsection{Experiments}
+\subsubsection{Hairpin}
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_lift_curv.jpg}
+  \caption{Curvilinear coordinates of vehicle in the low speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_lift_cg.jpg}
+  \caption{Center of gravity dynamics of the vehicle in the low speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_lift_u.jpg}
+  \caption{Controls in the low speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+
+The first sort of turn tested is the so called ``hairpin'' turn, i.e. a 180 degree turn with a small radius of curvature, in this case a radius of approximately 15 meters. Two experiments were run,
+in the first the vehicle approaches the turn at a relatively slow speed of 40 meters per second and does not need to slow down to make the turn, and in the second experiment the vehicle approaches
+the turn at speed of 60 meters per second and must brake in order to stay on the road and make the turn.
+
+As shown in the resulting plots the controller successfully navigates a situation where it must slow down to traverse the track in a time optimal way. The contraller also takes the path through the
+turn with the highest radius, minimizing the need for braking and optimizing exit speed for the following straight. The low speed experiment also shows an interesting behavior where the controller
+stops accelerating momentarily at the highest curvature point in order to maintain tire grip.
+
+For this scenario the no regularization method is used, and Levenberg-Marquardt constant of $0.01$.
+
+\subsubsection{Chicane}
+A further interesting experiment which was run was a squared off ``street circuit'' style chicane with two 90 degree turns, set 30 meters apart. Again the vehicle is forced to slow down to
+maintain tire grip. This experiment required significant tuning and was extremely sensitive to changes in chicane length and initial vehicle velocity. For this scenario the 'convexify' regularization
+method is used, along with a higher Levenberg-Marquardt constant of $0.1$.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.25]{chicane.jpg}
+  \caption{Trajectory followed by the vehicle in the chicane experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.5]{chicane_curv.jpg}
+  \caption{Curvilinear coordinates of vehicle in the chicane experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{chicane_cg.jpg}
+  \caption{Center of gravity dynamics of the vehicle in the chicane experiment.}
+  \label{fig:cg}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.5]{chicane_u.jpg}
+  \caption{Controls in the high speed hairpin experiment.}
+  \label{fig:cg}
+\end{figure}
+
+It is useful to note that in all 3 of these examples the cross term for engine and brake application perform the desired purpose and prevent brake and throttle application at the same time.
+
+Unfortunately in its current implementation, this controller runs at approximately $25$ times slower than real time when used in ordinary SQP mode. This is primarily due to the prevalence of
+steps in which the solver never reaches the required tolerances, that with the 1000 maximum iterations take multiple seconds to complete. The authors could not manage to successfully get convergence
+of the real time iteration even with initialization via pre solving a single SQP.
 
 \section{Conclusions}
+This project has only partially achieved it's goal of a robust time optimal model predictive controller. On one hand the formulation of the problem has successfully been proven out as viable.
+On the other hand tuning requirements specific to each scenario means that the system is not sufficiently general to operate on an actual track, or when significant model-plant mismatches exist.
+Once tuned the controller does however produce excellent results in difficult situations that require complex manuvers and operates in a time optimal fashion while maintaining the physical
+constraints of the vehicle. 
+
+
 
 \section{Further Exploration}
 
-\section*{Acknowledgment}
+There are several possible paths for extension to this project. The need to possibly re-formulate constraints or take advantage of other tricks to improve convergence, is a necessity.
+Further exploration of nonlinear tire models would also be interesting, in particular the use of a nonsmooth model instead of the oft used ``magic formula'' \cite{PAUWELUSSEN2015239}, to take
+advantage of advancements in non-smooth solvers.
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref.bib}

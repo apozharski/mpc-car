@@ -20,12 +20,15 @@ figure('Visible',visible);
 subplot(2,2,1);
 plot(ts,v_s);
 ylabel('$s$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,2);
 plot(ts,v_n);
 ylabel('$n$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
 plot(ts,v_alpha);
 ylabel('$\alpha$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 
 %% Plot vehicle CG state
 kappa = model.kappa(v_s);
@@ -34,30 +37,37 @@ figure('Visible',visible);
 subplot(2,2,1);
 plot(ts,v_u);
 ylabel('$u$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,2);
 plot(ts,v_v);
 ylabel('$v$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
 hold on;
 plot(ts,v_omega);
 ylabel('$\omega$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 plot(ts,v_u.*kappa,"--r");
 hold off;
 subplot(2,2,4);
 plot(ts,v_delta);
 ylabel('$\delta$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 
 %% Plot Controls
 figure('Visible',visible);
 subplot(2,2,1);
 stairs(ts(1:end-1),model.k_brake*v_control(1,:));
-ylabel('$t_{\textrm{brake}}$','Interpreter','latex','fontsize', 30);
+ylabel('$\tau_{b}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,2);
 stairs(ts(1:end-1),model.k_engine*v_control(2,:));
-ylabel('$t_{\textrm{engine}}$','Interpreter','latex','fontsize', 30);
+ylabel('$\tau_{e}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
 stairs(ts(1:end-1),v_control(3,:));
 ylabel('$\omega_{\textrm{steer}}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 
 %% Plot diagnostic internal state
 % TODO: pass in the whole model for constants
@@ -68,9 +78,11 @@ figure('Visible',visible);
 subplot(2,1,1);
 plot(ts,slip_f);
 ylabel('$\textrm{slip}_f$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,1,2);
 plot(ts,slip_r);
 ylabel('$\textrm{slip}_r$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 sgtitle('Slips','fontsize', 30);
 
 % Forces
@@ -82,15 +94,19 @@ figure('Visible',visible);
 subplot(2,2,1);
 stairs(ts(1:end-1),F_p_f);
 ylabel('$F_{pf}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,2);
 plot(ts,F_t_f);
 ylabel('$F_{tf}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
 stairs(ts(1:end-1),F_p_r);
 ylabel('$F_{pr}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,4);
 plot(ts,F_t_r);
 ylabel('$F_{tr}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 sgtitle('Forces','fontsize', 30)
 
 % force constraint
@@ -98,11 +114,13 @@ figure('Visible',visible);
 subplot(2,1,1);
 plot(ts(1:end-1),sqrt(F_p_f.^2+F_t_f(1:end-1).^2));
 ylabel('$|F_{f}|$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 yline((model.grip_coef*model.mass*model.g*(1-model.weight_bias)));
 subplot(2,1,2);
 plot(ts(1:end-1),sqrt(F_p_r.^2+F_t_r(1:end-1).^2));
 yline((model.grip_coef*model.mass*model.g*(model.weight_bias)));
 ylabel('$|F_{r}|$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 
 % force components
 F_f_u = -sin(v_traj(8,1:end-1)).*F_t_f(1:end-1) + cos(v_traj(8,1:end-1)).*F_p_f;
@@ -112,22 +130,27 @@ figure('Visible',visible);
 subplot(2,2,1);
 plot(ts(1:end-1),F_f_u);
 ylabel('$F_{fu}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 yline(0,'--r');
 subplot(2,2,2);
 plot(ts(1:end-1),F_f_v);
 ylabel('$F_{fv}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,3);
 plot(ts(1:end-1),F_p_r);
 ylabel('$F_{ru}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 subplot(2,2,4);
 plot(ts(1:end-1),F_t_r(1:end-1));
 ylabel('$F_{rv}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 sgtitle('Force Components','fontsize', 30);
 
 % Lateral accel
 figure('Visible',visible);
 plot(ts(1:end-1),(F_f_v + F_t_r(1:end-1))/model.mass);
 ylabel('$\dot{v}$','Interpreter','latex','fontsize', 30);
+xlabel('$t$','Interpreter','latex','fontsize', 30);
 %% Plot road trajectory
 
 % Calculate left and right hand side
