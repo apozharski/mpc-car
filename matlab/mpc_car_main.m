@@ -66,6 +66,13 @@ ocp_model.set('constr_expr_h', model.constr_expr_h);
 ocp_model.set('constr_lh', model.constr_lh);
 ocp_model.set('constr_uh', model.constr_uh);
 
+
+ocp_model.set('constr_Jsh', model.constr_Jsh);
+ocp_model.set('cost_zl', model.cost_zl);
+ocp_model.set('cost_zu', model.cost_zu);
+ocp_model.set('cost_Zl', model.cost_Zl);
+ocp_model.set('cost_Zu', model.cost_Zu);
+
 ocp_model.set('constr_Jbx_0', model.constr_Jbx_0);
 ocp_model.set('constr_lbx_0', model.constr_lbx_0);
 ocp_model.set('constr_ubx_0', model.constr_ubx_0);
@@ -80,18 +87,19 @@ ocp_model.set('constr_uh_e', model.constr_uh_e);
 
 %% acados ocp set opts
 ocp_opts = acados_ocp_opts();
-%ocp_opts.set('globalization','merit_backtracking');
+ocp_opts.set('globalization','merit_backtracking');
 ocp_opts.set('alpha_min',0.5);
 ocp_opts.set('nlp_solver_max_iter', 1000);
-%ocp_opts.set('regularize_method','project');
+ocp_opts.set('regularize_method','convexify');
 ocp_opts.set('nlp_solver_step_length',1);
 %ocp_opts.set('param_scheme','multiple_shooting');
-ocp_opts.set('nlp_solver_exact_hessian', 'true');
+%ocp_opts.set('nlp_solver_exact_hessian', 'true');
 ocp_opts.set('exact_hess_cost', 0);
 ocp_opts.set('exact_hess_dyn', 0);
 ocp_opts.set('nlp_solver_tol_stat', 1e-4);
-%ocp_opts.set('qp_solver_warm_start', 1);
-ocp_opts.set('levenberg_marquardt', 0.01);
+ocp_opts.set('nlp_solver_tol_ineq', 1e-5);
+ocp_opts.set('qp_solver_warm_start', 1);
+ocp_opts.set('levenberg_marquardt', 0.1);
 ocp_opts.set('param_scheme_N', N);
 %ocp_opts.set('nlp_solver', nlp_solver);
 ocp_opts.set('sim_method', sim_method);
@@ -150,25 +158,6 @@ if mpc
         mpc_ocp.set('p',[model.s_max]);
         mpc_ocp.solve();
         status = mpc_ocp.get('status');
-        if status ~= 0
-            % borrowed from acados/utils/types.h
-            %statuses = {
-            %    0: 'ACADOS_SUCCESS',
-            %    1: 'ACADOS_FAILURE',
-            %    2: 'ACADOS_MAXITER',
-            %    3: 'ACADOS_MINSTEP',
-            %    4: 'ACADOS_QP_FAILURE',
-            %    5: 'ACADOS_READY'
-            % TODO: maybe do an exponential backoff here of the LM constant
-            %       if we see QP Failure.
-            
-            if status == 4
-                mpc_ocp.print('stat');
-                error(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
-            else
-                warning(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
-            end
-        end
         mpc_ocp.print('stat');
         x0 = mpc_ocp.get('x', 0);
         dt = x0(4);
@@ -195,11 +184,30 @@ if mpc
             dt = x(4,1);
             ts = ts(1:end-1);
             [r_x,r_y,r_theta,r_s] = generate_road_curve(model.kappa,0,0,model.s_max);
-            f = plot_solution(r_x,r_y,r_theta,r_s,x,u,model,ts,'off');
+            f = plot_solution(r_x,r_y,r_theta,r_s,x,u,model,ts,'on');
             frame = getframe(f);
             frame = imresize(frame.cdata,[910,893]);
             writeVideo(video,frame);
             %pause
+        end
+        if status ~= 0
+            % borrowed from acados/utils/types.h
+            %statuses = {
+            %    0: 'ACADOS_SUCCESS',
+            %    1: 'ACADOS_FAILURE',
+            %    2: 'ACADOS_MAXITER',
+            %    3: 'ACADOS_MINSTEP',
+            %    4: 'ACADOS_QP_FAILURE',
+            %    5: 'ACADOS_READY'
+            % TODO: maybe do an exponential backoff here of the LM constant
+            %       if we see QP Failure.
+            
+            if status == 4
+                mpc_ocp.print('stat');
+                error(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
+            else
+                warning(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
+            end
         end
         % update init
         x = circshift(x, -1, 2);
