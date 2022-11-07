@@ -32,14 +32,15 @@ j_engine = MX.sym('j_engine');
 L_r = 1.482;
 L_f = 1.118;
 L = L_r+L_f;
-k_engine = 3000;
-k_brake = 2000;
+k_engine = 10000;
+k_brake = 20000;
 brake_bias = 0.5;
 mass = 1440;
 I = 1730;
 weight_bias = 0.5;
 k_r = 29;                 % Rear cornering stiffness
 k_f = 29;                 % Front cornering stiffness
+grip_coef = 1.2;
 
 C_u = 0.39;
 C_v = 0.39;
@@ -51,10 +52,11 @@ slip_f = atan2((v+L_f*omega),u) - delta;
 slip_r = atan2((v-L_r*omega),u);
 
 % Forces
+g = 9.8;
 F_p_r = k_engine*t_engine-k_brake*brake_bias*t_brake;
-F_t_r = -k_r*slip_r*(mass*weight_bias);
+F_t_r = -k_r*slip_r*(mass*g*weight_bias);
 F_p_f = -k_brake*(1-brake_bias)*t_brake;
-F_t_f = -k_f*slip_f*(mass*(1-weight_bias));
+F_t_f = -k_f*slip_f*(mass*g*(1-weight_bias));
 
 f_t_brake_dot = j_brake;
 f_t_engine_dot = j_engine;
@@ -80,13 +82,19 @@ Jbu_veh = eye(3);
 lbu_veh = [0;0;-0.5];
 ubu_veh = [1;1;0.5];
 
+expr_h_veh = [sqrt(F_p_f^2 + F_t_f^2)
+              sqrt(F_p_r^2 + F_t_r^2)];
+lh_veh = [-1e9;-1e9];
+uh_veh = [(grip_coef*mass*g*(1-weight_bias));(grip_coef*mass*g*weight_bias)];
+
+
 Jbx_e_veh = [];
 lbx_e_veh = [];
 ubx_e_veh = [];
 
 Jbx0_veh = eye(4);
 x0_veh = zeros(4,1);
-x0_veh(1) = 50;
+x0_veh(1) = 40;
 %% Generic part
 % (make local workspace a struct and pass to output
 names = who;

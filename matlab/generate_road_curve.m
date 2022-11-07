@@ -15,7 +15,7 @@ grid = linspace(0,s_max,201);
 
 ode = struct('x', [x;y;theta], 't', s, 'ode', f);
 opts = struct('grid',grid,'output_t0', true);
-F = integrator('F','cvodes',ode,opts);
+F = integrator('F','idas',ode,opts);
 r = F('x0',[x0;y0;0]);
 xf = full(r.xf);
 x_pos = xf(1,:);
