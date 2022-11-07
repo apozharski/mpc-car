@@ -82,10 +82,10 @@ Jbu_veh = eye(3);
 lbu_veh = [0;0;-0.5];
 ubu_veh = [1;1;0.5];
 
-expr_h_veh = [sqrt(F_p_f^2 + F_t_f^2)
-              sqrt(F_p_r^2 + F_t_r^2)];
+expr_h_veh = [F_p_f^2 + F_t_f^2
+              F_p_r^2 + F_t_r^2];
 lh_veh = [-1e9;-1e9];
-uh_veh = [(grip_coef*mass*g*(1-weight_bias));(grip_coef*mass*g*weight_bias)];
+uh_veh = [(grip_coef*mass*g*(1-weight_bias))^2;(grip_coef*mass*g*weight_bias)^2];
 
 
 Jbx_e_veh = [];

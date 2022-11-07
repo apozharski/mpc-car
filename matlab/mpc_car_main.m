@@ -90,7 +90,7 @@ ocp_opts = acados_ocp_opts();
 ocp_opts.set('globalization','merit_backtracking');
 %ocp_opts.set('alpha_min',0.5);
 ocp_opts.set('nlp_solver_max_iter', 1000);
-%ocp_opts.set('regularize_method','convexify');
+%ocp_opts.set('regularize_method','mirror');
 ocp_opts.set('nlp_solver_step_length',1);
 %ocp_opts.set('param_scheme','multiple_shooting');
 ocp_opts.set('nlp_solver_exact_hessian', 'true');
@@ -192,17 +192,8 @@ if mpc
             %pause
         end
         if status ~= 0
-            % borrowed from acados/utils/types.h
-            %statuses = {
-            %    0: 'ACADOS_SUCCESS',
-            %    1: 'ACADOS_FAILURE',
-            %    2: 'ACADOS_MAXITER',
-            %    3: 'ACADOS_MINSTEP',
-            %    4: 'ACADOS_QP_FAILURE',
-            %    5: 'ACADOS_READY'
             % TODO: maybe do an exponential backoff here of the LM constant
-            %       if we see QP Failure.
-            
+            %       if we see QP Failure, or maybe try and reinitialize?
             if status == 4
                 mpc_ocp.print('stat');
                 error(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
