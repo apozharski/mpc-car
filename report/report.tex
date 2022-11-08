@@ -177,7 +177,7 @@ The state space of the CG dynamics is as follows:
   \end{bmatrix}
   \label{eq:state}
 \end{equation}
-The model has three degrees of freedom that are used as control variables: the brake torque $\tau_{b}$, the brake torque $\tau_{e}$, and the steering rate
+The model has three degrees of freedom that are used as control variables: the brake torque $\tau_{b}$, the engine torque $\tau_{e}$, and the steering rate
 $\omega_{\mathrm{steer}}$:
 \begin{equation}
   \label{eq:control}
@@ -343,7 +343,7 @@ This then gives us the following formulation of the optimal control problem:
   \min_{x_{\mathrm{topt}}(\cdot),u(\cdot)}\int_{0}^{1} \Delta_t^2&+10^{-6}\tau_{e}\tau_{b}\\
   \IEEEnonumber&+10^{-6}\tau_{e}^2\\
   \IEEEnonumber&+10^{-6}\tau_{b}^2\\ 
-  \IEEEyesnumber\IEEEyessubnumber*&+10^{-6}\omega_{\mathrm{steer}}^2   \label{eq:prob1}
+  \IEEEyesnumber\IEEEyessubnumber*&+10^{-6}\omega_{\mathrm{steer}}^2dt   \label{eq:prob1}
 \end{IEEEeqnarray}
 
 subject to the equality constraints with $\tau$ dependence dropped where convenient:
@@ -480,25 +480,25 @@ method is used, along with a higher Levenberg-Marquardt constant of $0.1$.
   \centering
   \includegraphics[scale=0.25]{chicane.jpg}
   \caption{Trajectory followed by the vehicle in the chicane experiment.}
-  \label{fig:cg}
+  \label{fig:chicane}
 \end{figure}
 \begin{figure}[b]
   \centering
   \includegraphics[scale=0.5]{chicane_curv.jpg}
   \caption{Curvilinear coordinates of vehicle in the chicane experiment.}
-  \label{fig:cg}
+  \label{fig:chicane_curv}
 \end{figure}
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{chicane_cg.jpg}
   \caption{Center of gravity dynamics of the vehicle in the chicane experiment.}
-  \label{fig:cg}
+  \label{fig:chicane_cg}
 \end{figure}
 \begin{figure}[b]
   \centering
   \includegraphics[scale=0.5]{chicane_u.jpg}
   \caption{Controls in the high speed hairpin experiment.}
-  \label{fig:cg}
+  \label{fig:chicane_u}
 \end{figure}
 
 It is useful to note that in all 3 of these examples the cross term for engine and brake application perform the desired purpose and prevent brake and throttle application at the same time.
