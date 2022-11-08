@@ -22,6 +22,7 @@
 \usepackage{pgfplots}
 \usepackage{bm}
 \usepackage{IEEEtrantools}
+\usepackage{cleveref}
 
 \usetikzlibrary{automata, positioning, arrows, calc, shapes.multipart}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
@@ -109,7 +110,9 @@ adil.younas@gmx.de
 \maketitle
 
 \begin{abstract}
-  
+  This project sets out to formulate a true time optimal path finding problem for a rear wheel drive vehicle. The vehicle is modeled with linear in angle tire model, with slip limited via constraints.
+  Progress is made towards use of a more complex nonlinear model that can, in conjunction with an efficient NLP solver (ACADOS \cite{Verschueren2021}), be used for optimal control of a race vehicle,
+  and vehicle parameter optimization.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -128,6 +131,12 @@ tire model, but also by the commonly used time optimality reformulation that tak
 problem highly sensitive to initialization and hyper-parameters.
 
 \section{Formulation}
+\begin{figure}[t]
+  \centering
+  \includegraphics{curvilinear2.pdf}
+  \caption{curvilinear coordinate system}
+  \label{fig:curv}
+\end{figure}
 \subsection{Dynamics}
 The model of the dynamic system can be broken up into the road model, the dynamics of the vehicle in the CG (center of gravity) frame, and the dynamics of the vehicle in the
 curvilinear coordinate system.
@@ -154,12 +163,6 @@ The problem formulation addressed by ACADOS limits us to a single width function
   w_l = w(s) \label{eq:width2}
 \end{IEEEeqnarray}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics{curvilinear2.pdf}
-  \caption{curvilinear coordinate system}
-  \label{fig:curv}
-\end{figure}
 \subsubsection{CG Dynamics}
 The CG dynamics of the vehicle is modeled using a bicycle model (Figure. \ref{fig:cg}) that takes into account the slip angles and forces exerted by the front and rear tires independently.
 
@@ -192,12 +195,12 @@ The vehicle is modeled as rear wheel drive only.
   \caption{Forces acting on a tire.}
   \label{fig:tire}
 \end{figure}
-Each tire experiences two forces transverse and parallel to the rolling axis of the tire as shown in Figure. \ref{fig:tire} \ The parallel forces are defined as follows:
+Each tire experiences two forces transverse and parallel to the rolling axis of the tire as shown in \Cref{fig:tire}. The parallel forces are defined as follows:
 
 \begin{IEEEeqnarray}{C}
   \IEEEyesnumber \IEEEyessubnumber*
-  F_{fp} = -k_{\mathrm{b}}\tau_{\mathrm{b}} \label{eq:Ffp}\\
-  F_{rp} = k_{\mathrm{e}}\tau_{\mathrm{e}}-k_{\mathrm{b}}\tau_{\mathrm{b}}\label{eq:Frp}
+  F_{fp} = -k_{\mathrm{b}}\tau_{\mathrm{b}}(1-b_b) \label{eq:Ffp}\\
+  F_{rp} = k_{\mathrm{e}}\tau_{\mathrm{e}}-k_{\mathrm{b}}\tau_{\mathrm{b}}b_b\label{eq:Frp}
 \end{IEEEeqnarray}
 
 The transverse forces are modeled as a linear w.r.t the slip angle of the tire. The direction of travel angles are defined as follows:
@@ -222,22 +225,27 @@ the forces are then linear w.r.t the slip angles:
   F_{rt} = -K_r\sigma_r N_r\label{eq:Frt}
 \end{IEEEeqnarray}
 
-with $N_f$ and $N_r$ being the normal force on the tire in the front and rear respectively.
+with $N_f$ and $N_r$ being the normal force on the tire in the front and rear respectively and are exactly:
+\begin{IEEEeqnarray}{C}
+  \IEEEyesnumber \IEEEyessubnumber*
+  N_f = mg(1-m_b) \label{eq:Nf}\\
+  N_r = mg(m_b)\label{eq:Nr}
+\end{IEEEeqnarray}
 
-The dynamics in the CG frame is then simply defined through simple euclidean kinematics:
+The dynamics in the CG frame is then simply defined through simple euclidean kinematics with additional square terms for aerodynamic drag:
 
 \begin{equation}
   \label{eq:cgdyn}
   \dot{x}_{\mathrm{cg}} =
   \begin{bmatrix}
-    F_{rp} + F_{fp}\cos\delta - F_{ft}\sin\delta\\
-    F_{rf} + F_{fp}\sin\delta + F_{ft}\cos\delta\\
+    F_{rp} + F_{fp}\cos\delta - F_{ft}\sin\delta - C_uu^2\\
+    F_{rf} + F_{fp}\sin\delta + F_{ft}\cos\delta - C_vv^2\\
     -l_rF_{rt} + l_f\paren{F_{ft}\cos\delta + F_{fp}\sin\delta}\\
     \omega_{\mathrm{steer}}
   \end{bmatrix}
 \end{equation}
 
-\begin{figure}[b]
+\begin{figure}[t]
   \centering
   \includegraphics[scale=0.6]{vehicle_model.pdf}
   \caption{CG coordinate system}
@@ -286,6 +294,18 @@ With these dynamics defined the dynamics of the whole system are defined as:
 \end{IEEEeqnarray}
 
 \subsection{Problem Formulation}
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.25]{hairpin_brake.jpg}
+  \caption{Trajectory followed by the vehicle in the high speed hairpin experiment.}
+  \label{fig:hptraj}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.5]{hairpin_brake_curv.jpg}
+  \caption{Curvilinear coordinates of vehicle in the high speed hairpin experiment.}
+  \label{fig:hpcurv0}
+\end{figure}
 The MPC problem is solved using the ACADOS tool \cite{Verschueren2021}, which treats a specific problem formulation.
 In order to formulate the time optimal problem, a new state $\Delta_t$ is introduced that represents the speed of time. This gives the normalized dynamics:
 \begin{IEEEeqnarray}{C}
@@ -359,30 +379,19 @@ vehicle and provide the grip limits of the tires, similarly to the approach take
 In order to improve the convergence properties we introduce slack variables
 with $L_1$ penalties to the inequalities in Equations (\ref{eq:prob7}), (\ref{eq:prob13}), and (\ref{eq:prob14}).
 
+
 \section{Numerical Solution}
-\begin{figure}[t]
-  \centering
-  \includegraphics[scale=0.25]{hairpin_brake.jpg}
-  \caption{Trajectory followed by the vehicle in the high speed hairpin experiment.}
-  \label{fig:cg}
-\end{figure}
-\begin{figure}[b]
-  \centering
-  \includegraphics[scale=0.5]{hairpin_brake_curv.jpg}
-  \caption{Curvilinear coordinates of vehicle in the high speed hairpin experiment.}
-  \label{fig:cg}
-\end{figure}
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{hairpin_brake_cg.jpg}
   \caption{Center of gravity dynamics of the vehicle in the high speed hairpin experiment.}
-  \label{fig:cg}
+  \label{fig:hpcg0}
 \end{figure}
 \begin{figure}[b]
   \centering
   \includegraphics[scale=0.5]{hairpin_brake_u.jpg}
   \caption{Controls in the high speed hairpin experiment.}
-  \label{fig:cg}
+  \label{fig:hpu0}
 \end{figure}
 \subsection{Solver Options}
 The problem formulated above is solved using the ACADOS package. Due to inconsistency in convergence behavior from problem instance to problem instance some parameters were tuned specifically to
@@ -437,28 +446,28 @@ The Vehicle constants are listed in Table. \ref{tab:veh}.
   \centering
   \includegraphics[scale=0.5]{hairpin_lift_curv.jpg}
   \caption{Curvilinear coordinates of vehicle in the low speed hairpin experiment.}
-  \label{fig:cg}
+  \label{fig:hpcurv1}
 \end{figure}
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{hairpin_lift_cg.jpg}
   \caption{Center of gravity dynamics of the vehicle in the low speed hairpin experiment.}
-  \label{fig:cg}
+  \label{fig:hpcg1}
 \end{figure}
-\begin{figure}[b]
+\begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{hairpin_lift_u.jpg}
   \caption{Controls in the low speed hairpin experiment.}
-  \label{fig:cg}
+  \label{fig:hpu1}
 \end{figure}
 
 The first sort of turn tested is the so called ``hairpin'' turn, i.e. a 180 degree turn with a small radius of curvature, in this case a radius of approximately 15 meters. Two experiments were run,
 in the first the vehicle approaches the turn at a relatively slow speed of 40 meters per second and does not need to slow down to make the turn, and in the second experiment the vehicle approaches
 the turn at speed of 60 meters per second and must brake in order to stay on the road and make the turn.
 
-As shown in the resulting plots the controller successfully navigates a situation where it must slow down to traverse the track in a time optimal way. The controller also takes the path through the
-turn with the highest radius, minimizing the need for braking and optimizing exit speed for the following straight. The low speed experiment also shows an interesting behavior where the controller
-stops accelerating momentarily at the highest curvature point in order to maintain tire grip.
+As shown in the resulting plots (\Cref{fig:hpcurv0,fig:hpcg0,fig:hpu0}) the controller successfully navigates a situation where it must slow down to traverse the track in a time optimal way.
+The controller also takes the path through the turn with the highest radius, minimizing the need for braking and optimizing exit speed for the following straight. The low speed experiment
+(\Cref{fig:hpcurv1,fig:hpcg1,fig:hpu1}) also shows an interesting behavior where the controllerstops accelerating momentarily at the highest curvature point in order to maintain tire grip.
 
 For this scenario the no regularization method is used, and Levenberg-Marquardt constant of $0.01$.
 

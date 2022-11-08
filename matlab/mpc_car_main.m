@@ -3,6 +3,7 @@ import casadi.*
 
 %% Meta settings
 mpc = true;
+presolve = false;
 plot_each_iter = true;
 Nsim = 300;
 %% Model generation
@@ -142,10 +143,12 @@ if mpc
     ocp.set('init_u', u_traj_init);
     ocp.set('init_pi', zeros(nx, N));
     ocp.set('p',[model.s_max]);
-    %ocp.solve();
-    % get solution for initial conditions.
-    %u_traj_init = ocp.get('u');
-    %x_traj_init = ocp.get('x');
+    if presolve
+        ocp.solve();
+        get solution for initial conditions.
+        u_traj_init = ocp.get('u');
+        x_traj_init = ocp.get('x');
+    end
     mpc_ocp.set('init_x', x_traj_init);
     mpc_ocp.set('init_u', u_traj_init);
     mpc_ocp.set('init_pi', zeros(nx, N)); 
@@ -195,10 +198,10 @@ if mpc
             % TODO: maybe do an exponential backoff here of the LM constant
             %       if we see QP Failure, or maybe try and reinitialize?
             if status == 4
-                mpc_ocp.print('stat');
+                close(video);
                 error(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
             else
-                warning(sprintf('acados returned status %d in closed loop iteration %d. Exiting.', status, i));
+                warning(sprintf('acados returned status %d in closed loop iteration %d.', status, i));
             end
         end
         % update init

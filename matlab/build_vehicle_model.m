@@ -60,7 +60,7 @@ F_t_f = -k_f*slip_f*(mass*g*(1-weight_bias));
 
 f_t_brake_dot = j_brake;
 f_t_engine_dot = j_engine;
-f_delta_dot = omega_steer; % steering rate
+f_delta_dot = omega_steer;
 f_u_dot = F_p_r - sin(delta)*F_t_f + cos(delta)*F_p_f - C_u*u^2;
 f_v_dot = F_t_r + cos(delta)*F_t_f + sin(delta)*F_p_f - C_v*v^2;
 f_omega_dot = -F_t_r*L_r + (cos(delta)*F_t_f + sin(delta)*F_p_f)*L_f;
@@ -96,7 +96,7 @@ Jbx0_veh = eye(4);
 x0_veh = zeros(4,1);
 x0_veh(1) = 30;
 %% Generic part
-% (make local workspace a struct and pass to output
+% (make local workspace a struct and pass to output)
 names = who;
 for ii = 1:length(names)
     eval([ 'model.' names{ii} '=' names{ii} ';']);
