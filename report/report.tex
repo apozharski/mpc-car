@@ -394,9 +394,9 @@ with $L_1$ penalties to the inequalities in Equations (\ref{eq:prob7}), (\ref{eq
   \label{fig:hpu0}
 \end{figure}
 \subsection{Solver Options}
-The problem formulated above is solved using the ACADOS package. Due to inconsistency in convergence behavior from problem instance to problem instance some parameters were tuned specifically to
-get convergent results. These will be discussed in the conclusions and further explorations sections of this report. However there were several consistent parameters that were used for
-all the following experiments.
+The problem formulated above is solved using the ACADOS package compiled with openMP support enabled. Due to inconsistency in convergence behavior from problem instance to problem instance some
+parameters were tuned specifically to get convergent results. These will be discussed in the conclusions and further explorations sections of this report. However there were several consistent
+parameters that were used for all the following experiments.
 
 The dynamics are discretized using a 4th order implicit Runge-Kutta method with $N = 50$. Globalization is done through the merit function backtracking feature provided in the ACADOS package, using
 default settings. The required stopping tolerances for stationarity and inequality are set to $10^{-4}$ and $10^{-5}$ respectively. The problem is then solved using the standard SQP (sequential
